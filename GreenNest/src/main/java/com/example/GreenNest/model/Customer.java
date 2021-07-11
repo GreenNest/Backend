@@ -1,42 +1,38 @@
 package com.example.GreenNest.model;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
-@Table(name = "customer")
+@Table(name = "customer_details")
 public class Customer {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private int customer_id;
+    @Column(name = "customer_id")
+    int customer_id;
 
-    private String first_name;
-    private String last_name;
-    private String email;
-    private String password;
-    private int mobile;
-    private String role;
-    private int account_status;
+    @Column(name = "first_name")
+    String first_name;
 
-    public Customer(){
+    @Column(name = "last_name")
+    String last_name;
 
+    @Column(name = "mobile")
+    int mobile;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "up_id")
+    UserProfile profile;
+
+    public Customer() {
     }
 
-    public Customer(String first_name, String last_name, String email, String password, int mobile, String role, int account_status) {
+    public Customer(int customer_id, String first_name, String last_name, int mobile, UserProfile profile) {
+        this.customer_id = customer_id;
         this.first_name = first_name;
         this.last_name = last_name;
-        this.email = email;
-        this.password = password;
         this.mobile = mobile;
-        this.role = role;
-        this.account_status = account_status;
-    }
-
-    public int getCustomer_id() {
-        return customer_id;
-    }
-
-    public void setCustomer_id(int customer_id) {
-        this.customer_id = customer_id;
+        this.profile = profile;
     }
 
     public String getFirst_name() {
@@ -55,22 +51,6 @@ public class Customer {
         this.last_name = last_name;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public int getMobile() {
         return mobile;
     }
@@ -79,19 +59,26 @@ public class Customer {
         this.mobile = mobile;
     }
 
-    public String getRole() {
-        return role;
+    public UserProfile getProfile() {
+        return profile;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setProfile(UserProfile profile) {
+        this.profile = profile;
     }
 
-    public int getAccount_status() {
-        return account_status;
-    }
+    //    private String first_name;
+//    private String last_name;
+//    private String email;
+//    private String password;
+//    private int mobile;
+//    private String role;
+//    private int account_status;
 
-    public void setAccount_status(int account_status) {
-        this.account_status = account_status;
-    }
+//    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private Set<User> user;
+
+
+
+
 }
