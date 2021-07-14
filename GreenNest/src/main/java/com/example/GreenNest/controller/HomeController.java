@@ -114,7 +114,7 @@ public class HomeController {
         }
     }
 
-    //login user
+    //login user to the system
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<String> loginCustomer(@RequestBody LoginModel loginModel){
         List<String> message = new ArrayList<String>();
