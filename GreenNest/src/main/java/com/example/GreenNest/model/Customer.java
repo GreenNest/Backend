@@ -20,7 +20,7 @@ public class Customer {
     @Column(name = "mobile")
     int mobile;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "up_id")
     UserProfile profile;
 

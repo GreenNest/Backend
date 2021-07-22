@@ -1,31 +1,37 @@
 package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
-import com.example.GreenNest.model.*;
+import com.example.GreenNest.model.Customer;
+import com.example.GreenNest.model.Employee;
+import com.example.GreenNest.model.UserProfile;
 import com.example.GreenNest.repository.CustomerRepository;
 import com.example.GreenNest.repository.EmployeeRepository;
 import com.example.GreenNest.repository.UserProfileRepository;
-import com.example.GreenNest.security.Encryption;
-import com.example.GreenNest.service.UserService;
+import com.example.GreenNest.request.AuthenticationRequest;
+import com.example.GreenNest.request.LoginResponse;
+import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @RestController
-//@CrossOrigin(origins = "https://localhost:3000")
-@CrossOrigin("*")
+//@CrossOrigin("*")
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "http://localhost:3000")
 public class HomeController {
 
 
@@ -36,25 +42,26 @@ public class HomeController {
     private UserProfileRepository userProfileRepository;
 
     @Autowired
+    private MyUserDetailsService myUserDetailsService;
+
+    @Autowired
+    private PasswordEncoder bcryptEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    JWTTokenHelper jwtTokenHelper;
+
+    @Autowired
     private EmployeeRepository employeeRepository;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
-    Encryption encryption;
-
-    IvParameterSpec ivParameterSpec = encryption.generateIv();
-    SecretKey key = encryption.generateKey(128);
-    String algorithm = "AES/CBC/PKCS5Padding";
-
-    public HomeController() throws NoSuchAlgorithmException {
-    }
 
 
     @GetMapping("/user")
     public String home(){
-        return ("<h1> hello </h1>");
+        return "<h1> hello </h1>";
     }
 
     @GetMapping("/customer")
@@ -69,16 +76,13 @@ public class HomeController {
             throw new ResourceNotFoundException("Missing Data Exception");
         }
         else{
-            String hashPassword = userService.doHash(customer.getProfile().getPassword());
-
-            customer.getProfile().setPassword(hashPassword);
-
-            System.out.println(customer.getProfile().getPassword());
+            System.out.println(customer.getProfile().getEmail());
 
             List<String> username = userProfileRepository.getProfile(customer.getProfile().getEmail());
+            System.out.println(username);
 
             if(username.isEmpty()){
-                //customer.getProfile().setPassword(customer.getProfile().getPassword().hashCode());
+                customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
                 customerRepository.save(customer);
                 return true;
             }else{
@@ -94,110 +98,79 @@ public class HomeController {
         if (employee == null){
             throw new ResourceNotFoundException("Missing Data Exception");
         }else{
-            String hashPassword = userService.doHash(employee.getUserProfile().getPassword());
-
-            employee.getUserProfile().setPassword(hashPassword);
-
-            System.out.println(employee.getUserProfile().getPassword());
-
-            List<String> username = userProfileRepository.getProfile(employee.getUserProfile().getEmail());
-            System.out.println(username);
-
-            if(username.isEmpty()){
-                //customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
-                employeeRepository.save(employee);
-                return true;
-            }else{
-                System.out.println("already have an account");
-                return false;
-            }
+            employeeRepository.save(employee);
         }
+        return true;
     }
 
-    //login user to the system
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public List<String> loginCustomer(@RequestBody LoginModel loginModel){
-        List<String> message = new ArrayList<String>();
-        System.out.println(loginModel.getPassword());
-        String hashPassword = userService.doHash(loginModel.getPassword());
-        loginModel.setPassword(hashPassword);
-        System.out.println(loginModel.getPassword());
+    //login user
+//    @PostMapping(value = "/customer/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+//    public UserProfile loginCustomer(@RequestBody UserProfile userProfile){
+//        System.out.println(userProfile.getEmail());
+//        return userProfileRepository.findByEmail(userProfile.getEmail());
+//    }
 
-        UserProfile userProfile = userProfileRepository.findByEmail(loginModel.getUsername());
+    @PostMapping(value="/auth/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+        System.out.println(authenticationRequest.getUserName());
+        System.out.println(authenticationRequest.getPassword());
+        System.out.println("*************************");
+//        try{
+////            authenticationManager.authenticate(
+////                    new UsernamePasswordAuthenticationToken(authenticationRequest.getNewusername(), authenticationRequest.getUserpassword())
+////            );
+//            Authentication authentication = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword())
+//            );
+//            if(authentication.isAuthenticated()){
+//                final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUserName());
+//
+//                System.out.println(userDetails.getUsername());
+//                final String jwtToken = jwtTokenHelper.generateToken(userDetails);
+//                LoginResponse response = new LoginResponse();
+//                response.setToken(jwtToken);
+//                return  ResponseEntity.ok(response);
+//            }
+//
+//            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//        }catch (BadCredentialsException e){
+//           throw new Exception("incorrect username and password", e);
+//        }
+//
+//        System.out.println("close");
+//        return null;
+//
 
-        if(userProfile == null){
-            message.add("username not found");
-            return message;
-        }else{
-            if(loginModel.getPassword().equals(userProfile.getPassword())){
-                userProfileRepository.updateLoginDetailsWithUsername(0, loginModel.getUsername());
-                String role = userProfile.getRole();
-                message.add(role);
-                String id = String.valueOf(userProfile.getUser_id());
-                message.add(id);
-                return message;
-            }
-            else{
-                message.add("incorrect password");
-                return message;
-            }
-        }
+        final Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
 
-    }
+        System.out.println(authenticationRequest.getUserName());
+        System.out.println(authenticationRequest.getPassword());
 
-    //get session key
-    @PostMapping("/sessionKey")
-    public String getSessionKey (@RequestBody SessionDetails sessionDetails) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        String cipherText = encryption.encrypt(algorithm, sessionDetails.getUserId(), key, ivParameterSpec);
-        System.out.println(cipherText);
-        return cipherText;
-    }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserProfile userProfile = (UserProfile)authentication.getPrincipal();
+        String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
 
-    public String decryptUserIdFunc(String encryptedUserId, SecretKey key) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
-        try {
-            String plainText = encryption.decrypt(algorithm, encryptedUserId, key, ivParameterSpec);
-            System.out.println(plainText);
-            return plainText;
-        } catch (NoSuchPaddingException e) {
-            return e.getMessage();
-        } catch (NoSuchAlgorithmException e) {
-            return e.getMessage();
-        } catch (InvalidAlgorithmParameterException e) {
-            return e.getMessage();
-        } catch (InvalidKeyException e) {
-            return e.getMessage();
-        } catch (BadPaddingException e) {
-            return e.getMessage();
-        } catch (IllegalBlockSizeException e) {
-            return e.getMessage();
-        }
+        int x = userProfile.getUser_id();
 
-    }
+        Optional<Customer> customer = customerRepository.findById(x);
+        Object[] roles = customer.get().getProfile().getAuthorities().toArray();
+        System.out.println(customer.get().getFirst_name());
+        LoginResponse response = new LoginResponse();
+        response.setToken(jwtToken);
+        List<String> role = customer.get().getProfile().getAuthorities().stream()
+                .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-    // check user id
-    @PostMapping("/checkLoginState")
-    public LoginState encryptUserId(@RequestBody CipherText cipherText){
-        try{
-            System.out.println(cipherText.getCipher());
-            int userid = Integer.parseInt(decryptUserIdFunc(cipherText.getCipher(), key));
-            System.out.println(userid);
+        System.out.println(role);
+        response.setRoles(role);
+        response.setName(customer.get().getFirst_name());
 
-            List<String> userState = userProfileRepository.checkLoginStatusOnUser(userid);
-            LoginState loginState = new LoginState(Integer.parseInt(userState.get(0)), userid);
-            return  loginState;
+        return  ResponseEntity.ok(response);
 
-        } catch (Exception e){
-            return new LoginState();
-        }
-    }
 
-    //logout
-    @PostMapping("/logout")
-    public int logout(@RequestBody CipherText cipherText) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        int userId = Integer.parseInt(decryptUserIdFunc(cipherText.getCipher(), key));
-        int responset = userProfileRepository.updateLoginDetails(1, userId);
-        return responset;
 
     }
+
+
 
 }
