@@ -95,12 +95,24 @@ public class HomeController {
     //add employee
     @PostMapping(value = "/employee", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Boolean insertEmployee(@RequestBody Employee employee){
-        if (employee == null){
+        if(employee == null){
             throw new ResourceNotFoundException("Missing Data Exception");
-        }else{
-            employeeRepository.save(employee);
         }
-        return true;
+        else{
+            System.out.println(employee.getUserProfile().getEmail());
+
+            List<String> employeeEmail = userProfileRepository.getProfile(employee.getUserProfile().getEmail());
+            System.out.println(employeeEmail);
+
+            if(employeeEmail.isEmpty()){
+                employee.getUserProfile().setPassword(bcryptEncoder.encode(employee.getUserProfile().getPassword()));
+                employeeRepository.save(employee);
+                return true;
+            }else{
+                System.out.println("already have an account");
+                return false;
+            }
+        }
     }
 
     //login user
@@ -112,34 +124,6 @@ public class HomeController {
 
     @PostMapping(value="/auth/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-        System.out.println(authenticationRequest.getUserName());
-        System.out.println(authenticationRequest.getPassword());
-        System.out.println("*************************");
-//        try{
-////            authenticationManager.authenticate(
-////                    new UsernamePasswordAuthenticationToken(authenticationRequest.getNewusername(), authenticationRequest.getUserpassword())
-////            );
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword())
-//            );
-//            if(authentication.isAuthenticated()){
-//                final UserDetails userDetails = myUserDetailsService.loadUserByUsername(authenticationRequest.getUserName());
-//
-//                System.out.println(userDetails.getUsername());
-//                final String jwtToken = jwtTokenHelper.generateToken(userDetails);
-//                LoginResponse response = new LoginResponse();
-//                response.setToken(jwtToken);
-//                return  ResponseEntity.ok(response);
-//            }
-//
-//            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        }catch (BadCredentialsException e){
-//           throw new Exception("incorrect username and password", e);
-//        }
-//
-//        System.out.println("close");
-//        return null;
-//
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
@@ -170,6 +154,8 @@ public class HomeController {
 
 
     }
+
+
 
 
 

@@ -78,6 +78,9 @@ public class Customer {
 //    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    private Set<User> user;
 
+    //delete user
+
+
 
 
 

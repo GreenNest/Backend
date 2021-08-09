@@ -25,7 +25,7 @@ public class Employee {
     @Column(name = "account_status")
     int account_status;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_id")
     UserProfile userProfile;
 
