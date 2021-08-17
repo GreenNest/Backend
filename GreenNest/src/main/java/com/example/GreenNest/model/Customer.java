@@ -67,21 +67,4 @@ public class Customer {
         this.profile = profile;
     }
 
-    //    private String first_name;
-//    private String last_name;
-//    private String email;
-//    private String password;
-//    private int mobile;
-//    private String role;
-//    private int account_status;
-
-//    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<User> user;
-
-    //delete user
-
-
-
-
-
 }
