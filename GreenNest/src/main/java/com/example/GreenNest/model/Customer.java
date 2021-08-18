@@ -20,7 +20,7 @@ public class Customer {
     @Column(name = "mobile")
     int mobile;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "up_id")
     UserProfile profile;
 
@@ -66,19 +66,5 @@ public class Customer {
     public void setProfile(UserProfile profile) {
         this.profile = profile;
     }
-
-    //    private String first_name;
-//    private String last_name;
-//    private String email;
-//    private String password;
-//    private int mobile;
-//    private String role;
-//    private int account_status;
-
-//    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<User> user;
-
-
-
 
 }
