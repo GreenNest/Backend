@@ -11,9 +11,9 @@ public class ProductImages {
     long image_id;
     @Column(name = "imae_content")
     byte[] image_content;
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "images_id")
-    Product product;
+//    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+//    @JoinColumn(name = "images_id")
+//    Product product;
 
     public ProductImages() {
     }

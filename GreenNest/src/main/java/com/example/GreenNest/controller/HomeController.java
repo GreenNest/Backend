@@ -16,6 +16,7 @@ import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.MyUserDetailsService;
+import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -67,6 +69,9 @@ public class HomeController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private ProductService productService;
 
 
     @GetMapping("/user")
@@ -125,13 +130,6 @@ public class HomeController {
         }
     }
 
-    //login user
-//    @PostMapping(value = "/customer/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public UserProfile loginCustomer(@RequestBody UserProfile userProfile){
-//        System.out.println(userProfile.getEmail());
-//        return userProfileRepository.findByEmail(userProfile.getEmail());
-//    }
-
     @PostMapping(value="/auth/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
 
@@ -179,16 +177,7 @@ public class HomeController {
     public ResponseEntity<Object> addProduct(@ModelAttribute ProductDetails productDetails) throws IOException {
         //System.out.println(productDetails.isIsfeatured());
         try {
-            Product product = new Product();
-            product.setProduct_name(productDetails.getName());
-            product.setDescription(productDetails.getDetails());
-            product.setPrice(productDetails.getPrice());
-            product.setQuantity(productDetails.getAmount());
-            product.setFeatured(productDetails.isIsfeatured());
-            product.setReorder_level(productDetails.getReorderLevel());
-            product.setContent(productDetails.getFiles()[0].getBytes());
-
-            productRepository.save(product);
+            productService.addProduct(productDetails);
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
@@ -204,14 +193,16 @@ public class HomeController {
     }
 
     //get product by id
-//    @GetMapping(value = "/get/product/{id}")
-//    public void getImage(@PathVariable("id") Long id, HttpServletResponse response) throws IOException {
-//        Optional<Product> product = productRepository.findById(id);
-//        response.setContentType("image/jpeg,image/jpg,image/png,image/gif");
-//        response.getOutputStream().write(product.get().getContent());
-//        response.getOutputStream().close();
-//
-//    }
+    @GetMapping(value = "/get/product/{id}")
+    public ResponseEntity<Object> getImage(@PathVariable("id") Long id){
+        try {
+            ProductResponse productResponse = productService.getSingleProduct(id);
+            return ResponseHandle.response("successfully get the product", HttpStatus.OK, productResponse);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+
+    }
 
     //get featured product
     @GetMapping(value = "/get/featured/{feature}")
@@ -225,15 +216,10 @@ public class HomeController {
             productResponse.setDescription(x.getDescription());
             productResponse.setPrice(x.getPrice());
             productResponse.setAmount(x.getQuantity());
-            productResponse.setFileName(Base64.getEncoder().encodeToString(x.getContent()));
+            productResponse.setMainImage(Base64.getEncoder().encodeToString(x.getContent()));
             productResponses.add(productResponse);
         }
         return ResponseEntity.ok().body(productResponses);
-//        response.setContentType("image/jpeg,image/jpg,image/png,image/gif");
-//        for(Product x: product){
-//            response.getOutputStream().write(x.getContent());
-//        }
-//        response.getOutputStream().close();
 
     }
 
