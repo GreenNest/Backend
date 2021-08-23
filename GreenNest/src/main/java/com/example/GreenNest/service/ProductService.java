@@ -42,6 +42,7 @@ public class ProductService {
         productResponse.setName(product.get().getProduct_name());
         productResponse.setDescription(product.get().getDescription());
         productResponse.setPrice(product.get().getQuantity());
+        productResponse.setAmount(product.get().getQuantity());
         productResponse.setMainImage(Base64.getEncoder().encodeToString(product.get().getContent()));
         ArrayList<String> images = new ArrayList<>();
         images.add(Base64.getEncoder().encodeToString(product.get().getImage1()));
