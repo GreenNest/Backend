@@ -29,7 +29,7 @@ public class Product {
     @Column(name = "content",columnDefinition = "LONGBLOB")
     byte[] content;
 
-    @OneToMany( mappedBy = "images", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany( mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     Set<ProductImages> productImages;
 
     public Product() {
