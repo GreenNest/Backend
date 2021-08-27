@@ -29,13 +29,25 @@ public class Product {
     @Column(name = "content",columnDefinition = "LONGBLOB")
     byte[] content;
 
-    @OneToMany( mappedBy = "product", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    Set<ProductImages> productImages;
+    @Lob
+    @Column(name = "image1",columnDefinition = "LONGBLOB")
+    byte[] image1;
+
+    @Lob
+    @Column(name = "image2",columnDefinition = "LONGBLOB")
+    byte[] image2;
+
+    @Lob
+    @Column(name = "image3",columnDefinition = "LONGBLOB")
+    byte[] image3;
+
+//    @OneToMany( mappedBy = "images", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//    Set<ProductImages> productImages;
 
     public Product() {
     }
 
-    public Product(long product_id, String product_name, String description, double price, int quantity, boolean featured, int reorder_level, int product_status, byte[] content, Set<ProductImages> productImages) {
+    public Product(long product_id, String product_name, String description, double price, int quantity, boolean featured, int reorder_level, int product_status, byte[] content, byte[] image1, byte[] image2, byte[] image3) {
         this.product_id = product_id;
         this.product_name = product_name;
         this.description = description;
@@ -45,7 +57,9 @@ public class Product {
         this.reorder_level = reorder_level;
         this.product_status = product_status;
         this.content = content;
-        this.productImages = productImages;
+        this.image1 = image1;
+        this.image2 = image2;
+        this.image3 = image3;
     }
 
     public long getProduct_id() {
@@ -120,11 +134,27 @@ public class Product {
         this.content = content;
     }
 
-    public Set<ProductImages> getProductImages() {
-        return productImages;
+    public byte[] getImage1() {
+        return image1;
     }
 
-    public void setProductImages(Set<ProductImages> productImages) {
-        this.productImages = productImages;
+    public void setImage1(byte[] image1) {
+        this.image1 = image1;
+    }
+
+    public byte[] getImage2() {
+        return image2;
+    }
+
+    public void setImage2(byte[] image2) {
+        this.image2 = image2;
+    }
+
+    public byte[] getImage3() {
+        return image3;
+    }
+
+    public void setImage3(byte[] image3) {
+        this.image3 = image3;
     }
 }

@@ -8,18 +8,20 @@ public class ProductResponse {
     private String description;
     private double price;
     private int amount;
-    private String fileName;
+    private String mainImage;
+    private ArrayList<String> subImages;
 
     public ProductResponse() {
     }
 
-    public ProductResponse(long id, String name, String description, double price, int amount, String fileName) {
+    public ProductResponse(long id, String name, String description, double price, int amount, String mainImage, ArrayList<String> subImages) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.amount = amount;
-        this.fileName = fileName;
+        this.mainImage = mainImage;
+        this.subImages = subImages;
     }
 
     public long getId() {
@@ -62,11 +64,19 @@ public class ProductResponse {
         this.amount = amount;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getMainImage() {
+        return mainImage;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setMainImage(String mainImage) {
+        this.mainImage = mainImage;
+    }
+
+    public ArrayList<String> getSubImages() {
+        return subImages;
+    }
+
+    public void setSubImages(ArrayList<String> subImages) {
+        this.subImages = subImages;
     }
 }
