@@ -1,9 +1,9 @@
 package com.example.GreenNest.model;
 
-import org.w3c.dom.stylesheets.LinkStyle;
-
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "supplier_details")
@@ -11,37 +11,41 @@ public class SupplierDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int supplier_id;
+    int supplier_id;
 
     @Column(name = "first_name")
-    private String first_name;
+    String first_name;
 
     @Column(name = "last_name")
-    private String last_name;
+    String last_name;
 
     @Column(name = "address")
-    private String address;
+    String address;
 
     @Column(name = "email")
-    private String email;
+    String email;
 
     @Column(name = "mobile")
-    private int mobile;
+    int mobile;
+
+//    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id"), inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id"))
+//    private List<Category> categories;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id"), inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id"))
-    private List<Category> categories;
+    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false, updatable = false),
+            inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false, updatable = false))
+    Set<Category> categories = new HashSet<>();
 
     public SupplierDetails() {
     }
 
-    public SupplierDetails(String first_name, String last_name, String address, String email, int mobile, List<Category> categories) {
+    public SupplierDetails(String first_name, String last_name, String address, String email, int mobile) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
         this.email = email;
         this.mobile = mobile;
-        this.categories = categories;
     }
 
     public int getSupplier_id() {
@@ -92,11 +96,11 @@ public class SupplierDetails {
         this.mobile = mobile;
     }
 
-    public List<Category> getCategories() {
+    public Set<Category> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<Category> categories) {
+    public void setCategories(Set<Category> categories) {
         this.categories = categories;
     }
 }
