@@ -1,14 +1,8 @@
 package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
-import com.example.GreenNest.model.Customer;
-import com.example.GreenNest.model.Employee;
-import com.example.GreenNest.model.Product;
-import com.example.GreenNest.model.UserProfile;
-import com.example.GreenNest.repository.CustomerRepository;
-import com.example.GreenNest.repository.EmployeeRepository;
-import com.example.GreenNest.repository.ProductRepository;
-import com.example.GreenNest.repository.UserProfileRepository;
+import com.example.GreenNest.model.*;
+import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
@@ -32,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -72,6 +63,9 @@ public class HomeController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
 
     @GetMapping("/user")
@@ -175,9 +169,10 @@ public class HomeController {
     //add product details
     @PostMapping(value = "/add/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> addProduct(@ModelAttribute ProductDetails productDetails) throws IOException {
-        //System.out.println(productDetails.isIsfeatured());
         try {
             productService.addProduct(productDetails);
+            //System.out.println(productDetails.getCategories());
+
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
@@ -196,8 +191,9 @@ public class HomeController {
     @GetMapping(value = "/get/product/{id}")
     public ResponseEntity<Object> getImage(@PathVariable("id") Long id){
         try {
-            ProductResponse productResponse = productService.getSingleProduct(id);
-            return ResponseHandle.response("successfully get the product", HttpStatus.OK, productResponse);
+            //ProductResponse productResponse = productService.getSingleProduct(id);
+            Optional<Product> product = productRepository.findById(id);
+            return ResponseHandle.response("successfully get the product", HttpStatus.OK, product);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -220,7 +216,16 @@ public class HomeController {
             productResponses.add(productResponse);
         }
         return ResponseEntity.ok().body(productResponses);
+    }
 
+    @GetMapping(value = "/get/categories")
+    public ResponseEntity<?> getAllCategories(){
+        try {
+             List<Category> categories = categoryRepository.findAll();
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
     }
 
 

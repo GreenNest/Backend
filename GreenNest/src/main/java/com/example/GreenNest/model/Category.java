@@ -14,17 +14,17 @@ public class Category{
     @Column(name = "category_id")
     Long category_id;
 
-    @Column(name = "categoryName")
+    @Column(name = "categoryName", unique = true)
     String categoryName;
 
-    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    Set<SupplierDetails> supplierDetails = new HashSet<>();
+//    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//    Set<SupplierDetails> supplierDetails = new HashSet<>();
 
     public Category() {
     }
 
-    public Category(String category_name) {
-        this.categoryName = category_name;
+    public Category(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public Long getCategory_id() {
@@ -43,11 +43,11 @@ public class Category{
         this.categoryName = category_name;
     }
 
-    public Set<SupplierDetails> getSupplierDetails() {
-        return supplierDetails;
-    }
-
-    public void setSupplierDetails(Set<SupplierDetails> supplierDetails) {
-        this.supplierDetails = supplierDetails;
-    }
+//    public Set<SupplierDetails> getSupplierDetails() {
+//        return supplierDetails;
+//    }
+//
+//    public void setSupplierDetails(Set<SupplierDetails> supplierDetails) {
+//        this.supplierDetails = supplierDetails;
+//    }
 }
