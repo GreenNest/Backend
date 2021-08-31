@@ -14,7 +14,7 @@ public class Category{
     @Column(name = "category_id")
     Long category_id;
 
-    @Column(name = "categoryName")
+    @Column(name = "category_name")
     String categoryName;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
