@@ -200,16 +200,6 @@ public class HomeController {
     public ResponseEntity<?> getFeaturedProduct(@PathVariable("feature") Boolean feature, HttpServletResponse response) throws IOException {
         List<Product> product = productRepository.findByFeatured(feature);
         ArrayList<ProductResponse> productResponses = productService.createResponse(product);
-//        for(Product x: product){
-//            ProductResponse productResponse = new ProductResponse();
-//            productResponse.setId(x.getProduct_id());
-//            productResponse.setName(x.getProduct_name());
-//            productResponse.setDescription(x.getDescription());
-//            productResponse.setPrice(x.getPrice());
-//            productResponse.setAmount(x.getQuantity());
-//            productResponse.setMainImage(Base64.getEncoder().encodeToString(x.getContent()));
-//            productResponses.add(productResponse);
-//        }
         return ResponseEntity.ok().body(productResponses);
     }
 
