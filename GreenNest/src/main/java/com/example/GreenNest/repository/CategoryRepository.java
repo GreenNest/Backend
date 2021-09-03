@@ -13,4 +13,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c.categoryName FROM Category c")
     ArrayList<String> getCategory();
+
+
 }

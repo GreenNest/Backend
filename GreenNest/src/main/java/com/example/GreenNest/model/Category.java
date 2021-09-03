@@ -17,8 +17,11 @@ public class Category{
     @Column(name = "categoryName", unique = true)
     String categoryName;
 
-//    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    Set<SupplierDetails> supplierDetails = new HashSet<>();
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    Set<Product> products = new HashSet<>();
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    Set<SupplierDetails> supplierDetails = new HashSet<>();
 
     public Category() {
     }
@@ -43,11 +46,19 @@ public class Category{
         this.categoryName = category_name;
     }
 
-//    public Set<SupplierDetails> getSupplierDetails() {
-//        return supplierDetails;
-//    }
-//
-//    public void setSupplierDetails(Set<SupplierDetails> supplierDetails) {
-//        this.supplierDetails = supplierDetails;
-//    }
+    public Set<SupplierDetails> getSupplierDetails() {
+        return supplierDetails;
+    }
+
+    public void setSupplierDetails(Set<SupplierDetails> supplierDetails) {
+        this.supplierDetails = supplierDetails;
+    }
+
+    public Set<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
+    }
 }

@@ -68,6 +68,20 @@ public class ProductService {
         productResponse.setSubImages(images);
 
         return productResponse;
+    }
 
+    public ArrayList<ProductResponse> createResponse(List<Product> products){
+        ArrayList<ProductResponse> productResponses = new ArrayList<ProductResponse>();
+        for (Product p: products){
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(p.getProduct_id());
+            productResponse.setName(p.getProduct_name());
+            productResponse.setDescription(p.getDescription());
+            productResponse.setPrice(p.getPrice());
+            productResponse.setAmount(p.getQuantity());
+            productResponse.setMainImage(Base64.getEncoder().encodeToString(p.getContent()));
+            productResponses.add(productResponse);
+        }
+        return productResponses;
     }
 }

@@ -9,6 +9,7 @@ import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,9 @@ public class HomeController {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CategoryService categoryService;
 
 
     @GetMapping("/user")
@@ -178,22 +182,13 @@ public class HomeController {
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
     }
-    @GetMapping(value = "/product/{id}")
-    public ResponseEntity<?> getProduct(@PathVariable("id") long id){
-        Optional<Product> product = productRepository.findById(id);
-        byte[] image = product.get().getContent();
-        String encodeImage = Base64.getEncoder().encodeToString(image);
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(encodeImage);
-        //return ResponseEntity.ok().body(image);
-    }
 
     //get product by id
     @GetMapping(value = "/get/product/{id}")
     public ResponseEntity<Object> getImage(@PathVariable("id") Long id){
         try {
-            //ProductResponse productResponse = productService.getSingleProduct(id);
-            Optional<Product> product = productRepository.findById(id);
-            return ResponseHandle.response("successfully get the product", HttpStatus.OK, product);
+            ProductResponse productResponse = productService.getSingleProduct(id);
+            return ResponseHandle.response("successfully get the product", HttpStatus.OK, productResponse);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -204,25 +199,38 @@ public class HomeController {
     @GetMapping(value = "/get/featured/{feature}")
     public ResponseEntity<?> getFeaturedProduct(@PathVariable("feature") Boolean feature, HttpServletResponse response) throws IOException {
         List<Product> product = productRepository.findByFeatured(feature);
-        ArrayList<ProductResponse> productResponses = new ArrayList<ProductResponse>();
-        for(Product x: product){
-            ProductResponse productResponse = new ProductResponse();
-            productResponse.setId(x.getProduct_id());
-            productResponse.setName(x.getProduct_name());
-            productResponse.setDescription(x.getDescription());
-            productResponse.setPrice(x.getPrice());
-            productResponse.setAmount(x.getQuantity());
-            productResponse.setMainImage(Base64.getEncoder().encodeToString(x.getContent()));
-            productResponses.add(productResponse);
-        }
+        ArrayList<ProductResponse> productResponses = productService.createResponse(product);
+//        for(Product x: product){
+//            ProductResponse productResponse = new ProductResponse();
+//            productResponse.setId(x.getProduct_id());
+//            productResponse.setName(x.getProduct_name());
+//            productResponse.setDescription(x.getDescription());
+//            productResponse.setPrice(x.getPrice());
+//            productResponse.setAmount(x.getQuantity());
+//            productResponse.setMainImage(Base64.getEncoder().encodeToString(x.getContent()));
+//            productResponses.add(productResponse);
+//        }
         return ResponseEntity.ok().body(productResponses);
     }
 
+    //get all the categories
     @GetMapping(value = "/get/categories")
     public ResponseEntity<?> getAllCategories(){
         try {
-             List<Category> categories = categoryRepository.findAll();
+             //List<Category> categories = categoryRepository.findAll();
+            ArrayList<String> categories = categoryRepository.getCategory();
             return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //get products by category
+    @GetMapping(value = "/product/{category}")
+    public ResponseEntity<Object> getProductByCategory(@PathVariable("category") String category){
+        try {
+            ArrayList<ProductResponse> productResponses = categoryService.getProductList(category);
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, productResponses);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
