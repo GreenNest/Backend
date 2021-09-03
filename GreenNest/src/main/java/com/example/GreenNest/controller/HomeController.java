@@ -1,20 +1,15 @@
 package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
-import com.example.GreenNest.model.Customer;
-import com.example.GreenNest.model.Employee;
-import com.example.GreenNest.model.Product;
-import com.example.GreenNest.model.UserProfile;
-import com.example.GreenNest.repository.CustomerRepository;
-import com.example.GreenNest.repository.EmployeeRepository;
-import com.example.GreenNest.repository.ProductRepository;
-import com.example.GreenNest.repository.UserProfileRepository;
+import com.example.GreenNest.model.*;
+import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -72,6 +64,12 @@ public class HomeController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CategoryService categoryService;
 
 
     @GetMapping("/user")
@@ -175,21 +173,14 @@ public class HomeController {
     //add product details
     @PostMapping(value = "/add/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> addProduct(@ModelAttribute ProductDetails productDetails) throws IOException {
-        //System.out.println(productDetails.isIsfeatured());
         try {
             productService.addProduct(productDetails);
+            //System.out.println(productDetails.getCategories());
+
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
-    }
-    @GetMapping(value = "/product/{id}")
-    public ResponseEntity<?> getProduct(@PathVariable("id") long id){
-        Optional<Product> product = productRepository.findById(id);
-        byte[] image = product.get().getContent();
-        String encodeImage = Base64.getEncoder().encodeToString(image);
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(encodeImage);
-        //return ResponseEntity.ok().body(image);
     }
 
     //get product by id
@@ -208,19 +199,31 @@ public class HomeController {
     @GetMapping(value = "/get/featured/{feature}")
     public ResponseEntity<?> getFeaturedProduct(@PathVariable("feature") Boolean feature, HttpServletResponse response) throws IOException {
         List<Product> product = productRepository.findByFeatured(feature);
-        ArrayList<ProductResponse> productResponses = new ArrayList<ProductResponse>();
-        for(Product x: product){
-            ProductResponse productResponse = new ProductResponse();
-            productResponse.setId(x.getProduct_id());
-            productResponse.setName(x.getProduct_name());
-            productResponse.setDescription(x.getDescription());
-            productResponse.setPrice(x.getPrice());
-            productResponse.setAmount(x.getQuantity());
-            productResponse.setMainImage(Base64.getEncoder().encodeToString(x.getContent()));
-            productResponses.add(productResponse);
-        }
+        ArrayList<ProductResponse> productResponses = productService.createResponse(product);
         return ResponseEntity.ok().body(productResponses);
+    }
 
+    //get all the categories
+    @GetMapping(value = "/get/categories")
+    public ResponseEntity<?> getAllCategories(){
+        try {
+             //List<Category> categories = categoryRepository.findAll();
+            ArrayList<String> categories = categoryRepository.getCategory();
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //get products by category
+    @GetMapping(value = "/product/{category}")
+    public ResponseEntity<Object> getProductByCategory(@PathVariable("category") String category){
+        try {
+            ArrayList<ProductResponse> productResponses = categoryService.getProductList(category);
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, productResponses);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
     }
 
 

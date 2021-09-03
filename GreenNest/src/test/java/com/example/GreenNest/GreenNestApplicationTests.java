@@ -44,23 +44,39 @@ class GreenNestApplicationTests {
 	void contextLoads() throws IOException {
 
 		SupplierDetails supplierDetails = new SupplierDetails();
-		supplierDetails.setFirst_name("nimali");
+		supplierDetails.setFirst_name("dog");
 		supplierDetails.setLast_name("sunil");
 		supplierDetails.setAddress("kurunegala");
 		supplierDetails.setEmail("nimal@gmail.com");
 		supplierDetails.setMobile(0766655432);
-		supplierRepository.save(supplierDetails);
+		//supplierRepository.save(supplierDetails);
 
 //		Category category = new Category("indoor");
 //		Category category1 = new Category("outdoor");
 
-		Category category = categoryRepository.findByCategoryName("indoor");
-		supplierDetails.getCategories().add(category);
+		List<Category> categories1= new ArrayList<Category>();
+		ArrayList<String> data = new ArrayList<String>();
+		data.add("indoor");
+		data.add("outdoor");
+
+		//Category category2 = categoryRepository.findByCategoryName("indoor");
+		//System.out.println(category2);
+		//product.getCategories().add(category2);
+		for(int i=0;i<data.size();i++){
+			System.out.println(data.get(i));
+			Category category = categoryRepository.findByCategoryName(data.get(i));
+			categories1.add(category);
+		}
+
+		supplierDetails.getCategories().addAll(categories1);
+
+//		Category category = categoryRepository.findByCategoryName("indoor");
+//		Category category1 = categoryRepository.findByCategoryName("outdoor");
+//		supplierDetails.getCategories().add(category);
+//		supplierDetails.getCategories().add(category1);
 
 //		categoryRepository.saveAll(Arrays.asList(category, category1));
 //		supplierDetails.getCategories().addAll(Arrays.asList(category, category1));
-
-
 
 		supplierRepository.save(supplierDetails);
 

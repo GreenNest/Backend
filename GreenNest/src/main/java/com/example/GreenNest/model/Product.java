@@ -1,6 +1,8 @@
 package com.example.GreenNest.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,14 +43,16 @@ public class Product {
     @Column(name = "image3",columnDefinition = "LONGBLOB")
     byte[] image3;
 
-//    @OneToMany( mappedBy = "images", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    Set<ProductImages> productImages;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "ProductCategory", joinColumns = @JoinColumn(referencedColumnName = "product_id", nullable = false),
+    inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false))
+    Set<Category> categories = new HashSet<>();
+
 
     public Product() {
     }
 
-    public Product(long product_id, String product_name, String description, double price, int quantity, boolean featured, int reorder_level, int product_status, byte[] content, byte[] image1, byte[] image2, byte[] image3) {
-        this.product_id = product_id;
+    public Product(String product_name, String description, double price, int quantity, boolean featured, int reorder_level, int product_status, byte[] content, byte[] image1, byte[] image2, byte[] image3) {
         this.product_name = product_name;
         this.description = description;
         this.price = price;
@@ -156,5 +160,13 @@ public class Product {
 
     public void setImage3(byte[] image3) {
         this.image3 = image3;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
     }
 }

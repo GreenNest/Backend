@@ -62,9 +62,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests((request) -> request.antMatchers("/api/v1/auth/login", "/api/v1/customer", "/api/v1/employee","/api/v1/delete/{id}", "/api/v1/add/product","/api/v1/get/featured/{feature}","/api/v1/product/{id}",
                                 "/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/getCategories","/api/v1/addCategory/{id}").permitAll()
-
-                //.authorizeRequests((request) -> request.antMatchers("/api/v1/auth/login", "/api/v1/customer", "/api/v1/employee","/api/v1/delete/{id}", "/api/v1/add/product","/api/v1/get/featured/{feature}","/api/v1/get/product/{id}").permitAll()
-
                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated())
                 .addFilterBefore(new JWTAuthenticationFilter(myUserDetailsService, jwtTokenHelper),
                         UsernamePasswordAuthenticationFilter.class);
