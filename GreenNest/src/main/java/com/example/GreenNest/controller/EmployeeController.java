@@ -57,8 +57,6 @@ public class EmployeeController {
                         if (roles.get(j).getRoleCode().equals("worker")) {
                             filterList.add(empList.get(i));
                         }
-                    } else {
-                        System.out.println("theja");
                     }
                 }
             }

@@ -23,28 +23,13 @@ public class CategoryController {
     }
 
     //add category
-//    @PostMapping("/addCategory")
-//    public int addCategory(@RequestBody Category ctr){
-//        String name = "kamal";
-////        System.out.println(name);
-////        categoryName.setCategory_name(name);
-////        System.out.println(categoryName.setCategory_name(name));
-//        Category category = categoryRepository.save(ctr);
-//
-//        if(category.getCategory_name() != null){
-//            return 1;
-//        }
-//        return 0;
-//    }
-
     @GetMapping("/addCategory/{id}")
-    public int addCategory(@PathVariable("id") String ctgName){
-        System.out.println(ctgName);
-        Category ctr = new Category();
-        ctr.setCategory_name(ctgName);
-        Category ctr1 = categoryRepository.save(ctr);
-//
-        if(ctr1.getCategory_name() != null){
+    public int addCategory(@PathVariable("id") String categoryName){
+        Category category = new Category();
+        category.setCategory_name(categoryName);
+        Category saveCategory = categoryRepository.save(category);
+
+        if(saveCategory.getCategory_name() != null){
             return 1;
         }
         return 0;
