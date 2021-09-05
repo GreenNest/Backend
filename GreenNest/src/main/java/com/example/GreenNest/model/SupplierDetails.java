@@ -30,6 +30,9 @@ public class SupplierDetails {
     @Column(name = "mobile")
     int mobile;
 
+    @Column(name = "account_status")
+    int account_status;
+
 //    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 //    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id"), inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id"))
 //    private List<Category> categories;
@@ -43,12 +46,13 @@ public class SupplierDetails {
     public SupplierDetails() {
     }
 
-    public SupplierDetails(String first_name, String last_name, String address, String email, int mobile) {
+    public SupplierDetails(String first_name, String last_name, String address, String email, int mobile, int account_status) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
         this.email = email;
         this.mobile = mobile;
+        this.account_status = account_status;
     }
 
     public int getSupplier_id() {
@@ -98,6 +102,10 @@ public class SupplierDetails {
     public void setMobile(int mobile) {
         this.mobile = mobile;
     }
+
+    public int getAccount_status() { return account_status; }
+
+    public void setAccount_status(int account_status) { this.account_status = account_status; }
 
     public Set<Category> getCategories() {
         return categories;

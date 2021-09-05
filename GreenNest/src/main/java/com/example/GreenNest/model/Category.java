@@ -20,6 +20,7 @@ public class Category{
     String categoryName;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+//    @JsonIgnore
     Set<Product> products = new HashSet<>();
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

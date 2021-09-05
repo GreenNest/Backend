@@ -1,11 +1,13 @@
 package com.example.GreenNest.controller;
 
+import com.example.GreenNest.exception.ResourceNotFoundException;
 import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.SupplierDetails;
 import com.example.GreenNest.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,7 +21,16 @@ public class SupplierController {
     //get all suppliers
     @GetMapping("/getSuppliers")
     public List<SupplierDetails> getSuppliers(){
-        return supplierRepository.findAll();
+        List<SupplierDetails> supplierList = supplierRepository.findAll();
+        List<SupplierDetails> filterList = new ArrayList<SupplierDetails>();
+
+        for(int i=0; i<supplierList.size(); i++ ){
+            int status = supplierList.get(i).getAccount_status();
+            if(status == 0){
+                filterList.add(supplierList.get(i));
+            }
+        }
+        return filterList;
     }
 
     //add supplier
@@ -45,4 +56,19 @@ public class SupplierController {
 //
 //        return 1;
 //    }
+
+    //delete suppliers
+    @PutMapping("/deleteSupplier/{id}")
+    public int deleteSupplier(@PathVariable int id){
+        SupplierDetails supplierDetails = supplierRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not exist"));
+
+        supplierDetails.setAccount_status(1);
+        SupplierDetails deleteSupplier = supplierRepository.save(supplierDetails);
+
+        if(deleteSupplier.getAccount_status() == 1){
+            return  1;
+        }
+        return 0;
+    }
 }
