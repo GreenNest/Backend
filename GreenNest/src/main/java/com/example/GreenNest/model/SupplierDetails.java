@@ -1,5 +1,7 @@
 package com.example.GreenNest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,7 @@ public class SupplierDetails {
 //    private List<Category> categories;
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//    @JsonIgnore
     @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false, updatable = false),
             inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false, updatable = false))
     Set<Category> categories = new HashSet<>();

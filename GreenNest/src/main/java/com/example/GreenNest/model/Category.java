@@ -1,5 +1,7 @@
 package com.example.GreenNest.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ public class Category{
     String categoryName;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonIgnore
     Set<SupplierDetails> supplierDetails = new HashSet<>();
 
     public Category() {
