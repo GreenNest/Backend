@@ -1,6 +1,8 @@
 package com.example.GreenNest.service;
 
+import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.Product;
+import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.ProductRepository;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.ProductResponse;
@@ -8,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductService {
@@ -18,10 +18,13 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     public void addProduct(ProductDetails productDetails) throws IOException {
+        ArrayList<Category> categories = new ArrayList<Category>();
         Product product = new Product();
         product.setProduct_name(productDetails.getName());
-        System.out.println(productDetails.getName());
         product.setDescription(productDetails.getDetails());
         product.setPrice(productDetails.getPrice());
         product.setQuantity(productDetails.getAmount());
@@ -31,6 +34,20 @@ public class ProductService {
         product.setImage1(productDetails.getImage1().getBytes());
         product.setImage2(productDetails.getImage2().getBytes());
         product.setImage3(productDetails.getImage3().getBytes());
+        productRepository.save(product);
+        List<Category> categories1= new ArrayList<Category>();
+
+        for(int i=0;i<productDetails.getCategories().size();i++){
+            System.out.println(productDetails.getCategories().get(i));
+            Category category = categoryRepository.findByCategoryName(productDetails.getCategories().get(i));
+            categories1.add(category);
+        }
+        for(Category c:categories1){
+            System.out.println(c.getCategory_id());
+        }
+        //product.setCategories(categories1);
+        product.getCategories().addAll(categories1);
+
 
         productRepository.save(product);
     }
@@ -51,6 +68,20 @@ public class ProductService {
         productResponse.setSubImages(images);
 
         return productResponse;
+    }
 
+    public ArrayList<ProductResponse> createResponse(List<Product> products){
+        ArrayList<ProductResponse> productResponses = new ArrayList<ProductResponse>();
+        for (Product p: products){
+            ProductResponse productResponse = new ProductResponse();
+            productResponse.setId(p.getProduct_id());
+            productResponse.setName(p.getProduct_name());
+            productResponse.setDescription(p.getDescription());
+            productResponse.setPrice(p.getPrice());
+            productResponse.setAmount(p.getQuantity());
+            productResponse.setMainImage(Base64.getEncoder().encodeToString(p.getContent()));
+            productResponses.add(productResponse);
+        }
+        return productResponses;
     }
 }

@@ -1,9 +1,12 @@
 package com.example.GreenNest.request;
+import com.example.GreenNest.model.Category;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 //@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class ProductDetails {
@@ -17,12 +20,14 @@ public class ProductDetails {
     private MultipartFile image1;
     private MultipartFile image2;
     private MultipartFile image3;
+    //private Set<Category> categories;
+    private ArrayList<String> categories;
 
 
     public ProductDetails() {
     }
 
-    public ProductDetails(String name, String details, float price, int amount, boolean isfeatured, int reorderLevel, MultipartFile file, MultipartFile image1, MultipartFile image2, MultipartFile image3) {
+    public ProductDetails(String name, String details, float price, int amount, boolean isfeatured, int reorderLevel, MultipartFile file, MultipartFile image1, MultipartFile image2, MultipartFile image3, ArrayList<String> categories) {
         this.name = name;
         this.details = details;
         this.price = price;
@@ -33,6 +38,7 @@ public class ProductDetails {
         this.image1 = image1;
         this.image2 = image2;
         this.image3 = image3;
+        this.categories = categories;
     }
 
     public String getName() {
@@ -113,5 +119,13 @@ public class ProductDetails {
 
     public void setImage3(MultipartFile image3) {
         this.image3 = image3;
+    }
+
+    public ArrayList<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(ArrayList<String> categories) {
+        this.categories = categories;
     }
 }

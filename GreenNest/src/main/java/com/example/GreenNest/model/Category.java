@@ -16,8 +16,11 @@ public class Category{
     @Column(name = "category_id")
     Long category_id;
 
-    @Column(name = "category_name")
+    @Column(name = "categoryName", unique = true)
     String categoryName;
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    Set<Product> products = new HashSet<>();
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
@@ -26,8 +29,8 @@ public class Category{
     public Category() {
     }
 
-    public Category(String category_name) {
-        this.categoryName = category_name;
+    public Category(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public Long getCategory_id() {
@@ -52,5 +55,13 @@ public class Category{
 
     public void setSupplierDetails(Set<SupplierDetails> supplierDetails) {
         this.supplierDetails = supplierDetails;
+    }
+
+    public Set<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(Set<Product> products) {
+        this.products = products;
     }
 }
