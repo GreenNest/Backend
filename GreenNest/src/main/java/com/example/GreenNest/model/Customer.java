@@ -1,6 +1,8 @@
 package com.example.GreenNest.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -67,4 +69,11 @@ public class Customer {
         this.profile = profile;
     }
 
+    public int getCustomer_id() {
+        return customer_id;
+    }
+
+    public void setCustomer_id(int customer_id) {
+        this.customer_id = customer_id;
+    }
 }

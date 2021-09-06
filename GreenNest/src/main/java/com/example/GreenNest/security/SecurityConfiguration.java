@@ -60,7 +60,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint).and()
 
-                .authorizeRequests((request) -> request.antMatchers("/api/v1/auth/login", "/api/v1/customer", "/api/v1/employee","/api/v1/delete/{id}", "/api/v1/add/product","/api/v1/get/featured/{feature}","/api/v1/product/{id}",
+                .authorizeRequests((request) -> request.antMatchers("/api/v1/auth/login", "/api/v1/customer", "/api/v1/employee","/api/v1/delete/{id}", "/api/v1/add/product","/api/v1/get/featured/{feature}","/api/v1/get/product/{id}",
+                                "/api/v1/get/categories","/api/v1/product/{category}","/api/v1/request/add","/api/v1/reviews/add","/api/v1/reviews/get/{id}",
                                 "/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/getCategories","/api/v1/addCategory/{id}").permitAll()
                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll().anyRequest().authenticated())
                 .addFilterBefore(new JWTAuthenticationFilter(myUserDetailsService, jwtTokenHelper),
@@ -68,28 +69,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
          http.csrf().disable().cors().and().headers().frameOptions().disable();
 
-//        http.cors();
-//        http.csrf().disable()
-//                .authorizeRequests()
-//                .antMatchers("/api/v1/auth/login", "/api/v1/customer", "/api/v1/employee").permitAll()
-//                .anyRequest().authenticated()
-//                .and().sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-//                .and()
-//                .formLogin();
-//        http.sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .exceptionHandling()
-//                .authenticationEntryPoint(authenticationEntryPoint).and()
-//                .authorizeRequests((request) -> request.antMatchers("/api/v1/auth/login").permitAll().antMatchers(HttpMethod.OPTIONS, "/**")
-//                .permitAll().anyRequest().authenticated())
-//                .addFilterBefore(new JWTAuthenticationFilter(myUserDetailsService, jwtTokenHelper), UsernamePasswordAuthenticationFilter.class);
-//
-//        http.csrf().disable();
 
     }
 

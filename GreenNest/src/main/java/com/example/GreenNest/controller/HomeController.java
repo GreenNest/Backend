@@ -8,6 +8,7 @@ import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.response.ReviewResponse;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
@@ -45,9 +46,6 @@ public class HomeController {
     private UserProfileRepository userProfileRepository;
 
     @Autowired
-    private MyUserDetailsService myUserDetailsService;
-
-    @Autowired
     private PasswordEncoder bcryptEncoder;
 
     @Autowired
@@ -70,6 +68,12 @@ public class HomeController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private OrderRequestRepository orderRequestRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
 
     @GetMapping("/user")
@@ -134,8 +138,8 @@ public class HomeController {
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
 
-        System.out.println(authenticationRequest.getUserName());
-        System.out.println(authenticationRequest.getPassword());
+        //System.out.println(authenticationRequest.getUserName());
+        //System.out.println(authenticationRequest.getPassword());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
@@ -145,15 +149,16 @@ public class HomeController {
 
         Optional<Customer> customer = customerRepository.findById(x);
         Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-        System.out.println(customer.get().getFirst_name());
+        //System.out.println(customer.get().getFirst_name());
         LoginResponse response = new LoginResponse();
         response.setToken(jwtToken);
         List<String> role = customer.get().getProfile().getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        System.out.println(role);
+        //System.out.println(role);
         response.setRoles(role);
         response.setName(customer.get().getFirst_name());
+        response.setId(customer.get().getCustomer_id());
 
         return  ResponseEntity.ok(response);
     }
@@ -207,7 +212,6 @@ public class HomeController {
     @GetMapping(value = "/get/categories")
     public ResponseEntity<?> getAllCategories(){
         try {
-             //List<Category> categories = categoryRepository.findAll();
             ArrayList<String> categories = categoryRepository.getCategory();
             return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
         }catch (Exception e){
@@ -221,6 +225,55 @@ public class HomeController {
         try {
             ArrayList<ProductResponse> productResponses = categoryService.getProductList(category);
             return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, productResponses);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+    //post order request
+    @PostMapping(value = "/request/add")
+    public ResponseEntity<Object> addProductRequest(@RequestBody OrderRequest orderRequest){
+        try{
+            Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomer().getCustomer_id());
+            orderRequest.setCustomer(customer.get());
+            orderRequestRepository.save(orderRequest);
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, orderRequest);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //post product reviews
+    @PostMapping(value = "/reviews/add")
+    public ResponseEntity<Object> addProductReviews(@RequestBody Reviews reviews){
+        try{
+            Optional<Customer> customer = customerRepository.findById(reviews.getCustomer().getCustomer_id());
+            Optional<Product> product = productRepository.findById(reviews.getProduct().getProduct_id());
+
+            reviews.setCustomer(customer.get());
+            reviews.setProduct(product.get());
+            reviewRepository.save(reviews);
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //get reviews according to the product
+    @GetMapping(value = "/reviews/get/{id}")
+    public ResponseEntity<Object> getReviewsWithProduct(@PathVariable("id") Long id){
+        try {
+            Optional<Product> product = productRepository.findById(id);
+            List<Reviews> reviews = reviewRepository.findByProduct(product.get());
+            List<ReviewResponse> reviewResponses = new ArrayList<>();
+            for(Reviews r: reviews){
+                ReviewResponse reviewResponse = new ReviewResponse();
+                reviewResponse.setReviews(r.getReview());
+                reviewResponse.setRate(r.getRating());
+                reviewResponse.setDate(r.getDate());
+                reviewResponse.setCustomerName(r.getCustomer().getFirst_name());
+                reviewResponses.add(reviewResponse);
+            }
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, reviewResponses);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }

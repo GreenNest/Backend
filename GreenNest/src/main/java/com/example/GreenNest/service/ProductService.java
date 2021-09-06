@@ -54,6 +54,12 @@ public class ProductService {
 
     public ProductResponse getSingleProduct(long id){
         Optional<Product> product = productRepository.findById(id);
+        Set<Category> categories = product.get().getCategories();
+        ArrayList<String> names = new ArrayList<String>();
+        for (Category c: categories){
+            names.add(c.getCategory_name());
+        }
+
         ProductResponse productResponse = new ProductResponse();
         productResponse.setId(product.get().getProduct_id());
         productResponse.setName(product.get().getProduct_name());
@@ -66,12 +72,14 @@ public class ProductService {
         images.add(Base64.getEncoder().encodeToString(product.get().getImage2()));
         images.add(Base64.getEncoder().encodeToString(product.get().getImage3()));
         productResponse.setSubImages(images);
+        productResponse.setCategories(names);
 
         return productResponse;
     }
 
     public ArrayList<ProductResponse> createResponse(List<Product> products){
         ArrayList<ProductResponse> productResponses = new ArrayList<ProductResponse>();
+        ArrayList<String> categories = new ArrayList<String>();
         for (Product p: products){
             ProductResponse productResponse = new ProductResponse();
             productResponse.setId(p.getProduct_id());
