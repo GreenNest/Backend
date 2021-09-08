@@ -9,7 +9,10 @@ import com.example.GreenNest.response.OrderPlaceResponse;
 import com.example.GreenNest.utils.PaymentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,8 @@ public class OrderPlaceService {
     @Autowired
     private PaymentInfoRepository paymentInfoRepository;
 
+    @Transactional
+//            (readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public OrderPlaceResponse placeOrder(OrderPlaceRequest request){
 //        OrderPlaceResponse response=null;
 

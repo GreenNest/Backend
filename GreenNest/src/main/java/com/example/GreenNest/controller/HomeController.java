@@ -24,6 +24,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 //@CrossOrigin("*")
 @RequestMapping("/api/v1")
 @CrossOrigin(origins = "http://localhost:3000")
+@EnableTransactionManagement
 public class HomeController {
 
 
