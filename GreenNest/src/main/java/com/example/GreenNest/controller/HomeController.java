@@ -5,12 +5,15 @@ import com.example.GreenNest.model.*;
 import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
+import com.example.GreenNest.request.OrderPlaceRequest;
 import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.response.OrderPlaceResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
+import com.example.GreenNest.service.OrderPlaceService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -226,7 +229,15 @@ public class HomeController {
         }
     }
 
+    //placeOrder
 
+    @Autowired
+    private OrderPlaceService service;
+
+    @PostMapping("/placeOrder")
+    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
+        return service.placeOrder(request);
+    }
 
 
 
