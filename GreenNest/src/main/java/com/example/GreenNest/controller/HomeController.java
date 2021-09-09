@@ -6,12 +6,12 @@ import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.response.CartResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.response.ReviewResponse;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
-import com.example.GreenNest.service.MyUserDetailsService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,11 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +72,8 @@ public class HomeController {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired CartRepository cartRepository;
 
 
     @GetMapping("/user")
@@ -230,9 +230,10 @@ public class HomeController {
         }
     }
     //post order request
-    @PostMapping(value = "/request/add")
+    @PostMapping(value = "/request/add",  consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> addProductRequest(@RequestBody OrderRequest orderRequest){
         try{
+            System.out.println(orderRequest.getProductName());
             Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomer().getCustomer_id());
             orderRequest.setCustomer(customer.get());
             orderRequestRepository.save(orderRequest);
@@ -279,9 +280,61 @@ public class HomeController {
         }
     }
 
+    //add to cart
+    @PostMapping(value = "/cart/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> addToCart(@RequestBody Cart cart){
+        try{
+            Optional<Customer> customer = customerRepository.findById(cart.getCustomer().getCustomer_id());
+            Optional<Product> product = productRepository.findById(cart.getProduct().getProduct_id());
+            System.out.println(cart.getQuantity());
+            cart.setCustomer(customer.get());
+            cart.setProduct(product.get());
+            cartRepository.save(cart);
+            return ResponseHandle.response("successfully add to the cart", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //get cart items
+    @GetMapping(value = "/cart/get/{id}")
+    public ResponseEntity<Object> getCartItems(@PathVariable("id") int id){
+        try{
+            System.out.println(id);
+            Optional<Customer> customer = customerRepository.findById(id);
+            List<Cart> carts = cartRepository.findByCustomer(customer.get());
+            List<CartResponse> cartResponses = new ArrayList<CartResponse>();
+            for(Cart c: carts){
+                CartResponse cartResponse = new CartResponse();
+                cartResponse.setId(c.getCartId());
+                cartResponse.setPrice(c.getTotalPrice());
+                cartResponse.setQuantity(c.getQuantity());
+                cartResponse.setName(c.getProduct().getProduct_name());
+                cartResponse.setProduct_id(c.getProduct().getProduct_id());
+                cartResponses.add(cartResponse);
+            }
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, cartResponses);
 
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //delete item in the cart
+    @DeleteMapping(value = "/cart/delete/{id}")
+    public ResponseEntity<Object> deleteCartItem(@PathVariable("id") long id){
+        cartRepository.deleteById(id);
+        return ResponseHandle.response("successfully delete the item", HttpStatus.OK, null);
+        //return new ResponseEntity<>(HttpStatus.OK);
+    }
 
+    //update the product stock quantity
+    @PutMapping(value = "/product/update/{id}/{amount}")
+    public Boolean updateProductStock(@PathVariable long id, @PathVariable int amount){
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not exist"));
+        product.setQuantity(amount);
+        Product product1 = productRepository.save(product);
+        return product1.getQuantity() == amount;
+    }
 
 }
