@@ -10,11 +10,12 @@ public class ProductResponse {
     private int amount;
     private String mainImage;
     private ArrayList<String> subImages;
+    private ArrayList<String> categories;
 
     public ProductResponse() {
     }
 
-    public ProductResponse(long id, String name, String description, double price, int amount, String mainImage, ArrayList<String> subImages) {
+    public ProductResponse(long id, String name, String description, double price, int amount, String mainImage, ArrayList<String> subImages, ArrayList<String> categories) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -22,6 +23,7 @@ public class ProductResponse {
         this.amount = amount;
         this.mainImage = mainImage;
         this.subImages = subImages;
+        this.categories = categories;
     }
 
     public long getId() {
@@ -78,5 +80,13 @@ public class ProductResponse {
 
     public void setSubImages(ArrayList<String> subImages) {
         this.subImages = subImages;
+    }
+
+    public ArrayList<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(ArrayList<String> categories) {
+        this.categories = categories;
     }
 }

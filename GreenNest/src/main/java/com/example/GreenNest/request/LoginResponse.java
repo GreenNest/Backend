@@ -6,14 +6,16 @@ public class LoginResponse {
     private String token;
     private List<String> roles;
     private String name;
+    private int id;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(String token, List<String> roles, String name) {
+    public LoginResponse(String token, List<String> roles, String name, int id) {
         this.token = token;
         this.roles = roles;
         this.name = name;
+        this.id = id;
     }
 
     public String getToken() {
@@ -38,5 +40,13 @@ public class LoginResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
