@@ -114,4 +114,5 @@ public class SupplierDetails {
     public void setCategories(Set<Category> categories) {
         this.categories = categories;
     }
+
 }
