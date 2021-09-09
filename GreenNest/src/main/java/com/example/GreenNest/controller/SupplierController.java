@@ -3,8 +3,15 @@ package com.example.GreenNest.controller;
 import com.example.GreenNest.exception.ResourceNotFoundException;
 import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.SupplierDetails;
+import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.SupplierRepository;
+import com.example.GreenNest.response.ProductResponse;
+import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.response.SupplierResponse;
+import com.example.GreenNest.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -18,19 +25,18 @@ public class SupplierController {
     @Autowired
     private SupplierRepository supplierRepository;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private SupplierService supplierService;
+
     //get all suppliers
     @GetMapping("/getSuppliers")
-    public List<SupplierDetails> getSuppliers(){
-        List<SupplierDetails> supplierList = supplierRepository.findAll();
-        List<SupplierDetails> filterList = new ArrayList<SupplierDetails>();
-
-        for(int i=0; i<supplierList.size(); i++ ){
-            int status = supplierList.get(i).getAccount_status();
-            if(status == 0){
-                filterList.add(supplierList.get(i));
-            }
-        }
-        return filterList;
+    public ResponseEntity<?> getSuppliers(){
+        List<SupplierDetails> supplierDetails = supplierRepository.findAll();
+        ArrayList<SupplierResponse> supplierResponses = supplierService.createResponse(supplierDetails);
+        return ResponseEntity.ok().body(supplierResponses);
     }
 
     //add supplier
@@ -43,19 +49,6 @@ public class SupplierController {
         }
         return 0;
     }
-
-    //add used categories
-//    @GetMapping("/usedCategoryAdd/{id}")
-//    public int saveSupplierCategories(@PathVariable List<String> categories){
-//        SupplierDetails addCategory = new SupplierDetails();
-//        Category category = new Category("pot");
-//
-//        for(int i=0; i<categories.size(); i++) {
-//
-//        }
-//
-//        return 1;
-//    }
 
     //delete suppliers
     @PutMapping("/deleteSupplier/{id}")
@@ -71,4 +64,5 @@ public class SupplierController {
         }
         return 0;
     }
+
 }

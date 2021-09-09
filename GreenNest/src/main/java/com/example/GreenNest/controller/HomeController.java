@@ -204,16 +204,16 @@ public class HomeController {
     }
 
     //get all the categories
-    @GetMapping(value = "/get/categories")
-    public ResponseEntity<?> getAllCategories(){
-        try {
-             //List<Category> categories = categoryRepository.findAll();
-            ArrayList<String> categories = categoryRepository.getCategory();
-            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
-        }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-        }
-    }
+//    @GetMapping(value = "/get/categories")
+//    public ResponseEntity<?> getAllCategories(){
+//        try {
+//             //List<Category> categories = categoryRepository.findAll();
+//            ArrayList<String> categories = categoryRepository.getCategory();
+//            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+//        }catch (Exception e){
+//            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+//        }
+//    }
 
     //get products by category
     @GetMapping(value = "/product/{category}")
