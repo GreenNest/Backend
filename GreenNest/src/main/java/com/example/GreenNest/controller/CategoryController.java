@@ -2,10 +2,14 @@ package com.example.GreenNest.controller;
 
 import com.example.GreenNest.model.Category;
 import com.example.GreenNest.repository.CategoryRepository;
+import com.example.GreenNest.response.ResponseHandle;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.management.monitor.StringMonitor;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -17,34 +21,24 @@ public class CategoryController {
     private CategoryRepository categoryRepository;
 
     //get all categories
-    @GetMapping("/getCategories")
-    public List<Category> getCategories(){
-        return categoryRepository.findAll();
+    @GetMapping("/get/categories")
+    public ResponseEntity<?> getAllCategories(){
+        try {
+            ArrayList<String> categories = categoryRepository.getCategory();
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
     }
 
     //add category
-//    @PostMapping("/addCategory")
-//    public int addCategory(@RequestBody Category ctr){
-//        String name = "kamal";
-////        System.out.println(name);
-////        categoryName.setCategory_name(name);
-////        System.out.println(categoryName.setCategory_name(name));
-//        Category category = categoryRepository.save(ctr);
-//
-//        if(category.getCategory_name() != null){
-//            return 1;
-//        }
-//        return 0;
-//    }
-
     @GetMapping("/addCategory/{id}")
-    public int addCategory(@PathVariable("id") String ctgName){
-        System.out.println(ctgName);
-        Category ctr = new Category();
-        ctr.setCategory_name(ctgName);
-        Category ctr1 = categoryRepository.save(ctr);
-//
-        if(ctr1.getCategory_name() != null){
+    public int addCategory(@PathVariable("id") String categoryName){
+        Category category = new Category();
+        category.setCategory_name(categoryName);
+        Category saveCategory = categoryRepository.save(category);
+
+        if(saveCategory.getCategory_name() != null){
             return 1;
         }
         return 0;
