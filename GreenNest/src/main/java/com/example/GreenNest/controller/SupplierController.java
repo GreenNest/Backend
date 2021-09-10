@@ -54,7 +54,7 @@ public class SupplierController {
     @PutMapping("/deleteSupplier/{id}")
     public int deleteSupplier(@PathVariable int id){
         SupplierDetails supplierDetails = supplierRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not exist"));
 
         supplierDetails.setAccount_status(1);
         SupplierDetails deleteSupplier = supplierRepository.save(supplierDetails);

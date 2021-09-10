@@ -8,18 +8,20 @@ public class ProductResponse {
     private String description;
     private double price;
     private int amount;
+    private int reorder_level;
     private String mainImage;
     private ArrayList<String> subImages;
 
     public ProductResponse() {
     }
 
-    public ProductResponse(long id, String name, String description, double price, int amount, String mainImage, ArrayList<String> subImages) {
+    public ProductResponse(long id, String name, String description, double price, int amount, int reorder_level, String mainImage, ArrayList<String> subImages) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.amount = amount;
+        this.reorder_level = reorder_level;
         this.mainImage = mainImage;
         this.subImages = subImages;
     }
@@ -62,6 +64,14 @@ public class ProductResponse {
 
     public void setAmount(int amount) {
         this.amount = amount;
+    }
+
+    public int getReorder_level() {
+        return reorder_level;
+    }
+
+    public void setReorder_level(int reorder_level) {
+        this.reorder_level = reorder_level;
     }
 
     public String getMainImage() {
