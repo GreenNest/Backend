@@ -6,11 +6,12 @@ import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.response.CartResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.response.ReviewResponse;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
-import com.example.GreenNest.service.MyUserDetailsService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,9 +42,6 @@ public class HomeController {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
-
-    @Autowired
-    private MyUserDetailsService myUserDetailsService;
 
     @Autowired
     private PasswordEncoder bcryptEncoder;
@@ -70,6 +66,14 @@ public class HomeController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private OrderRequestRepository orderRequestRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired CartRepository cartRepository;
 
 
     @GetMapping("/user")
@@ -134,8 +138,8 @@ public class HomeController {
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
 
-        System.out.println(authenticationRequest.getUserName());
-        System.out.println(authenticationRequest.getPassword());
+        //System.out.println(authenticationRequest.getUserName());
+        //System.out.println(authenticationRequest.getPassword());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
@@ -145,15 +149,16 @@ public class HomeController {
 
         Optional<Customer> customer = customerRepository.findById(x);
         Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-        System.out.println(customer.get().getFirst_name());
+        //System.out.println(customer.get().getFirst_name());
         LoginResponse response = new LoginResponse();
         response.setToken(jwtToken);
         List<String> role = customer.get().getProfile().getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        System.out.println(role);
+        //System.out.println(role);
         response.setRoles(role);
         response.setName(customer.get().getFirst_name());
+        response.setId(customer.get().getCustomer_id());
 
         return  ResponseEntity.ok(response);
     }
@@ -204,6 +209,17 @@ public class HomeController {
     }
 
     //get all the categories
+<<<<<<< HEAD
+    @GetMapping(value = "/get/categories")
+    public ResponseEntity<?> getAllCategories(){
+        try {
+            ArrayList<String> categories = categoryRepository.getCategory();
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+=======
 //    @GetMapping(value = "/get/categories")
 //    public ResponseEntity<?> getAllCategories(){
 //        try {
@@ -214,6 +230,7 @@ public class HomeController {
 //            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
 //        }
 //    }
+>>>>>>> 5f1b096f88ab153ec1d9cdc134d14b0d03a69d4c
 
     //get products by category
     @GetMapping(value = "/product/{category}")
@@ -225,10 +242,112 @@ public class HomeController {
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
     }
+    //post order request
+    @PostMapping(value = "/request/add",  consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> addProductRequest(@RequestBody OrderRequest orderRequest){
+        try{
+            System.out.println(orderRequest.getProductName());
+            Optional<Customer> customer = customerRepository.findById(orderRequest.getCustomer().getCustomer_id());
+            orderRequest.setCustomer(customer.get());
+            orderRequestRepository.save(orderRequest);
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, orderRequest);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //post product reviews
+    @PostMapping(value = "/reviews/add")
+    public ResponseEntity<Object> addProductReviews(@RequestBody Reviews reviews){
+        try{
+            Optional<Customer> customer = customerRepository.findById(reviews.getCustomer().getCustomer_id());
+            Optional<Product> product = productRepository.findById(reviews.getProduct().getProduct_id());
 
+            reviews.setCustomer(customer.get());
+            reviews.setProduct(product.get());
+            reviewRepository.save(reviews);
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //get reviews according to the product
+    @GetMapping(value = "/reviews/get/{id}")
+    public ResponseEntity<Object> getReviewsWithProduct(@PathVariable("id") Long id){
+        try {
+            Optional<Product> product = productRepository.findById(id);
+            List<Reviews> reviews = reviewRepository.findByProduct(product.get());
+            List<ReviewResponse> reviewResponses = new ArrayList<>();
+            for(Reviews r: reviews){
+                ReviewResponse reviewResponse = new ReviewResponse();
+                reviewResponse.setReviews(r.getReview());
+                reviewResponse.setRate(r.getRating());
+                reviewResponse.setDate(r.getDate());
+                reviewResponse.setCustomerName(r.getCustomer().getFirst_name());
+                reviewResponses.add(reviewResponse);
+            }
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, reviewResponses);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //add to cart
+    @PostMapping(value = "/cart/add", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Object> addToCart(@RequestBody Cart cart){
+        try{
+            Optional<Customer> customer = customerRepository.findById(cart.getCustomer().getCustomer_id());
+            Optional<Product> product = productRepository.findById(cart.getProduct().getProduct_id());
+            System.out.println(cart.getQuantity());
+            cart.setCustomer(customer.get());
+            cart.setProduct(product.get());
+            cartRepository.save(cart);
+            return ResponseHandle.response("successfully add to the cart", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
 
+    //get cart items
+    @GetMapping(value = "/cart/get/{id}")
+    public ResponseEntity<Object> getCartItems(@PathVariable("id") int id){
+        try{
+            System.out.println(id);
+            Optional<Customer> customer = customerRepository.findById(id);
+            List<Cart> carts = cartRepository.findByCustomer(customer.get());
+            List<CartResponse> cartResponses = new ArrayList<CartResponse>();
+            for(Cart c: carts){
+                CartResponse cartResponse = new CartResponse();
+                cartResponse.setId(c.getCartId());
+                cartResponse.setPrice(c.getTotalPrice());
+                cartResponse.setQuantity(c.getQuantity());
+                cartResponse.setName(c.getProduct().getProduct_name());
+                cartResponse.setProduct_id(c.getProduct().getProduct_id());
+                cartResponses.add(cartResponse);
+            }
+            return ResponseHandle.response("successfully send the request", HttpStatus.OK, cartResponses);
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //delete item in the cart
+    @DeleteMapping(value = "/cart/delete/{id}")
+    public ResponseEntity<Object> deleteCartItem(@PathVariable("id") long id){
+        cartRepository.deleteById(id);
+        return ResponseHandle.response("successfully delete the item", HttpStatus.OK, null);
+        //return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //update the product stock quantity
+    @PutMapping(value = "/product/update/{id}/{amount}")
+    public Boolean updateProductStock(@PathVariable long id, @PathVariable int amount){
+        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not exist"));
+        product.setQuantity(amount);
+        Product product1 = productRepository.save(product);
+        return product1.getQuantity() == amount;
+    }
 
 }
