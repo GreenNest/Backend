@@ -5,6 +5,8 @@ import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.SupplierDetails;
 import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.SupplierRepository;
+import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.request.SupplierRequest;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.response.SupplierResponse;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +27,6 @@ public class SupplierController {
 
     @Autowired
     private SupplierRepository supplierRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
 
     @Autowired
     private SupplierService supplierService;
@@ -41,13 +41,14 @@ public class SupplierController {
 
     //add supplier
     @PostMapping("/addSupplier")
-    public int saveSupplier(@RequestBody SupplierDetails supplier){
-        SupplierDetails supplierDetails = supplierRepository.save(supplier);
-
-        if (supplierDetails.getFirst_name() != null){
-            return supplierDetails.getSupplier_id();
+    public ResponseEntity<Object> addSupplier(@RequestBody SupplierRequest supplierRequest) {
+        try {
+            System.out.println(supplierRequest.getCategories());
+            supplierService.addSupplier(supplierRequest);
+            return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
-        return 0;
     }
 
     //delete suppliers
