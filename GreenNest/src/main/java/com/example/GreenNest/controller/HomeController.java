@@ -60,7 +60,14 @@ public class HomeController {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    @Autowired CartRepository cartRepository;
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderDetailsRepository orderDetailsRepository;
 
 
     @GetMapping("/user")
@@ -75,23 +82,20 @@ public class HomeController {
 
     //add customer
     @PostMapping(value = "/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean insertCustomer(@RequestBody Customer customer){
+    public ResponseEntity<?> insertCustomer(@RequestBody Customer customer){
         if(customer == null){
             throw new ResourceNotFoundException("Missing Data Exception");
         }
         else{
-            System.out.println(customer.getProfile().getEmail());
-
             List<String> username = userProfileRepository.getProfile(customer.getProfile().getEmail());
             System.out.println(username);
 
             if(username.isEmpty()){
                 customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
                 customerRepository.save(customer);
-                return true;
+                return ResponseEntity.ok("Successfully create an account");
             }else{
-                System.out.println("already have an account");
-                return false;
+                return ResponseEntity.badRequest().body("Email is already in use.");
             }
         }
 
@@ -102,9 +106,6 @@ public class HomeController {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-
-        //System.out.println(authenticationRequest.getUserName());
-        //System.out.println(authenticationRequest.getPassword());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
@@ -140,7 +141,6 @@ public class HomeController {
 //        Customer customer = customerRepository.findById(id);
 //        return new ResponseEntity<>(customer, HttpStatus.OK);
 //    }
-
 
     //post order request
     @PostMapping(value = "/request/add",  consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -239,6 +239,24 @@ public class HomeController {
         cartRepository.deleteById(id);
         return ResponseHandle.response("successfully delete the item", HttpStatus.OK, null);
         //return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    //get the orders
+    @GetMapping(value = "/order/get/{id}")
+    public ResponseEntity<Object> getOrderList(@PathVariable("id") int id){
+        try{
+            Optional<Customer> customer = customerRepository.findById(id);
+            List<OrderDetails> orderDetails = orderDetailsRepository.findByCustomer(customer.get());
+            if(orderDetails.isEmpty()){
+                return ResponseHandle.response("Order history is empty", HttpStatus.OK, null);
+            }else {
+                return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+            }
+
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
     }
 
 }
