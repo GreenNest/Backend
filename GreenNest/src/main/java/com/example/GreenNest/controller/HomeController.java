@@ -73,7 +73,14 @@ public class HomeController {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    @Autowired CartRepository cartRepository;
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderDetailsRepository orderDetailsRepository;
 
 
     @GetMapping("/user")
@@ -88,23 +95,20 @@ public class HomeController {
 
     //add customer
     @PostMapping(value = "/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean insertCustomer(@RequestBody Customer customer){
+    public ResponseEntity<?> insertCustomer(@RequestBody Customer customer){
         if(customer == null){
             throw new ResourceNotFoundException("Missing Data Exception");
         }
         else{
-            System.out.println(customer.getProfile().getEmail());
-
             List<String> username = userProfileRepository.getProfile(customer.getProfile().getEmail());
             System.out.println(username);
 
             if(username.isEmpty()){
                 customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
                 customerRepository.save(customer);
-                return true;
+                return ResponseEntity.ok("Successfully create an account");
             }else{
-                System.out.println("already have an account");
-                return false;
+                return ResponseEntity.badRequest().body("Email is already in use.");
             }
         }
 
@@ -137,9 +141,6 @@ public class HomeController {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-
-        //System.out.println(authenticationRequest.getUserName());
-        //System.out.println(authenticationRequest.getPassword());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
@@ -207,30 +208,6 @@ public class HomeController {
         ArrayList<ProductResponse> productResponses = productService.createResponse(product);
         return ResponseEntity.ok().body(productResponses);
     }
-
-    //get all the categories
-<<<<<<< HEAD
-    @GetMapping(value = "/get/categories")
-    public ResponseEntity<?> getAllCategories(){
-        try {
-            ArrayList<String> categories = categoryRepository.getCategory();
-            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
-        }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-        }
-    }
-=======
-//    @GetMapping(value = "/get/categories")
-//    public ResponseEntity<?> getAllCategories(){
-//        try {
-//             //List<Category> categories = categoryRepository.findAll();
-//            ArrayList<String> categories = categoryRepository.getCategory();
-//            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, categories);
-//        }catch (Exception e){
-//            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-//        }
-//    }
->>>>>>> 5f1b096f88ab153ec1d9cdc134d14b0d03a69d4c
 
     //get products by category
     @GetMapping(value = "/product/{category}")
@@ -349,5 +326,25 @@ public class HomeController {
         Product product1 = productRepository.save(product);
         return product1.getQuantity() == amount;
     }
+
+    //get the orders
+    @GetMapping(value = "/order/get/{id}")
+    public ResponseEntity<Object> getOrderList(@PathVariable("id") int id){
+        try{
+            Optional<Customer> customer = customerRepository.findById(id);
+            List<OrderDetails> orderDetails = orderDetailsRepository.findByCustomer(customer.get());
+            if(orderDetails.isEmpty()){
+                return ResponseHandle.response("Order history is empty", HttpStatus.OK, null);
+            }else {
+                return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+            }
+
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+
 
 }
