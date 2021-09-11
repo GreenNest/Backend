@@ -3,13 +3,16 @@ package com.example.GreenNest.service;
 import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.Product;
 import com.example.GreenNest.model.SupplierDetails;
+import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.SupplierRepository;
+import com.example.GreenNest.request.SupplierRequest;
 import com.example.GreenNest.response.CategoryResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.SupplierResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -22,6 +25,9 @@ public class SupplierService {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     public ArrayList<SupplierResponse> createResponse(List<SupplierDetails> supplierDetails){
         ArrayList<SupplierResponse> supplierResponses = new ArrayList<SupplierResponse>();
@@ -45,5 +51,25 @@ public class SupplierService {
             }
         }
         return supplierResponses;
+    }
+
+    public void addSupplier(SupplierRequest supplierRequest) {
+        SupplierDetails supplierDetails = new SupplierDetails();
+        supplierDetails.setFirst_name(supplierRequest.getFirst_name());
+        supplierDetails.setLast_name(supplierRequest.getLast_name());
+        supplierDetails.setAddress(supplierRequest.getAddress());
+        supplierDetails.setEmail(supplierRequest.getEmail());
+        supplierDetails.setMobile(supplierRequest.getMobile());
+        supplierRepository.save(supplierDetails);
+
+        List<Category> categories = new ArrayList<Category>();
+
+        for(int i=0; i<supplierRequest.getCategories().size(); i++) {
+            Category category = categoryRepository.findByCategoryName(supplierRequest.getCategories().get(i));
+            categories.add(category);
+        }
+
+        supplierDetails.getCategories().addAll(categories);
+        supplierRepository.save(supplierDetails);
     }
 }
