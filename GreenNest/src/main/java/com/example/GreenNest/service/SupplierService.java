@@ -8,6 +8,7 @@ import com.example.GreenNest.repository.SupplierRepository;
 import com.example.GreenNest.request.SupplierRequest;
 import com.example.GreenNest.response.CategoryResponse;
 import com.example.GreenNest.response.ProductResponse;
+import com.example.GreenNest.response.SupplierByCategoryResponse;
 import com.example.GreenNest.response.SupplierResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,5 +72,41 @@ public class SupplierService {
 
         supplierDetails.getCategories().addAll(categories);
         supplierRepository.save(supplierDetails);
+    }
+
+    public ArrayList<SupplierByCategoryResponse> getSuppliers(List<Category> categories){
+        ArrayList<SupplierByCategoryResponse> supplierByCategoryResponses = new ArrayList<SupplierByCategoryResponse>();
+        for (Category c: categories){
+            SupplierByCategoryResponse supplierByCategoryResponse = new SupplierByCategoryResponse();
+            supplierByCategoryResponse.setCategory_id(c.getCategory_id());
+            supplierByCategoryResponse.setCategoryName(c.getCategory_name());
+
+            List<SupplierDetails> supplierDetails = new ArrayList<SupplierDetails>();
+            supplierDetails.addAll(c.getSupplierDetails());
+
+            ArrayList<SupplierResponse> supplierResponses = supplierByCategory(supplierDetails);
+            supplierByCategoryResponse.setSuppliers(supplierResponses);
+
+            supplierByCategoryResponses.add(supplierByCategoryResponse);
+        }
+        return supplierByCategoryResponses;
+    }
+
+    public ArrayList<SupplierResponse> supplierByCategory(List<SupplierDetails> supplierDetails){
+        ArrayList<SupplierResponse> supplierResponses = new ArrayList<SupplierResponse>();
+        for (SupplierDetails s: supplierDetails){
+            if(s.getAccount_status() == 0) {
+                SupplierResponse supplierResponse = new SupplierResponse();
+                supplierResponse.setId(s.getSupplier_id());
+                supplierResponse.setFirst_name(s.getFirst_name());
+                supplierResponse.setLast_name(s.getLast_name());
+                supplierResponse.setAddress(s.getAddress());
+                supplierResponse.setEmail(s.getEmail());
+                supplierResponse.setMobile(s.getMobile());
+
+                supplierResponses.add(supplierResponse);
+            }
+        }
+        return supplierResponses;
     }
 }

@@ -9,6 +9,7 @@ import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.request.SupplierRequest;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.response.SupplierByCategoryResponse;
 import com.example.GreenNest.response.SupplierResponse;
 import com.example.GreenNest.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class SupplierController {
     @Autowired
     private SupplierService supplierService;
 
+    @Autowired
+    private CategoryRepository categoryRepository;
+
     //get all suppliers
     @GetMapping("/getSuppliers")
     public ResponseEntity<?> getSuppliers(){
@@ -43,7 +47,7 @@ public class SupplierController {
     @PostMapping("/addSupplier")
     public ResponseEntity<Object> addSupplier(@RequestBody SupplierRequest supplierRequest) {
         try {
-            System.out.println(supplierRequest.getCategories());
+//          System.out.println(supplierRequest.getCategories());
             supplierService.addSupplier(supplierRequest);
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
         }catch (Exception e){
@@ -64,6 +68,19 @@ public class SupplierController {
             return  1;
         }
         return 0;
+    }
+
+    //get suppliers by category
+    @GetMapping(value = "/suppliersByCategory")
+    public ResponseEntity<Object> getSuppliersByCategory(){
+        try {
+            List<Category> categories = categoryRepository.findAll();
+            List<SupplierByCategoryResponse> supplierByCategoryResponses = supplierService.getSuppliers(categories);
+
+            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, supplierByCategoryResponses);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
     }
 
 }
