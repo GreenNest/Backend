@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "http://localhost:3000")
 public class HomeController {
 
-
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -65,19 +64,7 @@ public class HomeController {
     JWTTokenHelper jwtTokenHelper;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
-    @Autowired
-    private CategoryService categoryService;
 
     @Autowired
     private OrderRequestRepository orderRequestRepository;
@@ -140,28 +127,6 @@ public class HomeController {
         }
 
     }
-    //add employee
-    @PostMapping(value = "/employee", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean insertEmployee(@RequestBody Employee employee){
-        if(employee == null){
-            throw new ResourceNotFoundException("Missing Data Exception");
-        }
-        else{
-            System.out.println(employee.getUserProfile().getEmail());
-
-            List<String> employeeEmail = userProfileRepository.getProfile(employee.getUserProfile().getEmail());
-            System.out.println(employeeEmail);
-
-            if(employeeEmail.isEmpty()){
-                employee.getUserProfile().setPassword(bcryptEncoder.encode(employee.getUserProfile().getPassword()));
-                employeeRepository.save(employee);
-                return true;
-            }else{
-                System.out.println("already have an account");
-                return false;
-            }
-        }
-    }
 
     @PostMapping(value="/auth/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
@@ -194,6 +159,7 @@ public class HomeController {
 
         return  ResponseEntity.ok(response);
     }
+
      //delete user
     @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<Customer> deleteCountry(@PathVariable("id") int id){
@@ -207,49 +173,6 @@ public class HomeController {
 //        return new ResponseEntity<>(customer, HttpStatus.OK);
 //    }
 
-    //add product details
-    @PostMapping(value = "/add/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> addProduct(@ModelAttribute ProductDetails productDetails) throws IOException {
-        try {
-            productService.addProduct(productDetails);
-            //System.out.println(productDetails.getCategories());
-
-            return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
-        }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-        }
-    }
-
-    //get product by id
-    @GetMapping(value = "/get/product/{id}")
-    public ResponseEntity<Object> getImage(@PathVariable("id") Long id){
-        try {
-            ProductResponse productResponse = productService.getSingleProduct(id);
-            return ResponseHandle.response("successfully get the product", HttpStatus.OK, productResponse);
-        }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-        }
-
-    }
-
-    //get featured product
-    @GetMapping(value = "/get/featured/{feature}")
-    public ResponseEntity<?> getFeaturedProduct(@PathVariable("feature") Boolean feature, HttpServletResponse response) throws IOException {
-        List<Product> product = productRepository.findByFeatured(feature);
-        ArrayList<ProductResponse> productResponses = productService.createResponse(product);
-        return ResponseEntity.ok().body(productResponses);
-    }
-
-    //get products by category
-    @GetMapping(value = "/product/{category}")
-    public ResponseEntity<Object> getProductByCategory(@PathVariable("category") String category){
-        try {
-            ArrayList<ProductResponse> productResponses = categoryService.getProductList(category);
-            return ResponseHandle.response("successfully get the categories.", HttpStatus.OK, productResponses);
-        }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-        }
-    }
     //post order request
     @PostMapping(value = "/request/add",  consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> addProductRequest(@RequestBody OrderRequest orderRequest){
@@ -347,15 +270,6 @@ public class HomeController {
         cartRepository.deleteById(id);
         return ResponseHandle.response("successfully delete the item", HttpStatus.OK, null);
         //return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    //update the product stock quantity
-    @PutMapping(value = "/product/update/{id}/{amount}")
-    public Boolean updateProductStock(@PathVariable long id, @PathVariable int amount){
-        Product product = productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not exist"));
-        product.setQuantity(amount);
-        Product product1 = productRepository.save(product);
-        return product1.getQuantity() == amount;
     }
 
     //get the orders
