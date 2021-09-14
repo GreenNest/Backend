@@ -6,6 +6,7 @@ public class CartResponse {
     private int quantity;
     private double price;
     private String image;
+    private double singlePrice;
     private String name;
     private long product_id;
     // product name
@@ -14,11 +15,12 @@ public class CartResponse {
     public CartResponse() {
     }
 
-    public CartResponse(long id, int quantity, double price, String image, String name, long product_id) {
+    public CartResponse(long id, int quantity, double price, String image, double singlePrice, String name, long product_id) {
         this.id = id;
         this.quantity = quantity;
         this.price = price;
         this.image = image;
+        this.singlePrice = singlePrice;
         this.name = name;
         this.product_id = product_id;
     }
@@ -69,5 +71,13 @@ public class CartResponse {
 
     public void setProduct_id(long product_id) {
         this.product_id = product_id;
+    }
+
+    public double getSinglePrice() {
+        return singlePrice;
+    }
+
+    public void setSinglePrice(double singlePrice) {
+        this.singlePrice = singlePrice;
     }
 }
