@@ -28,6 +28,9 @@ public class UserProfile implements UserDetails {
     @JoinTable(name = "AUTH_USER_AUTHORITY", joinColumns = @JoinColumn(referencedColumnName = "user_id"),inverseJoinColumns = @JoinColumn(referencedColumnName ="id"))
     private List<Authority> authorities;
 
+    @Column(name = "password_pin", columnDefinition = "integer default 0")
+    private int passwordPin;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
@@ -85,5 +88,13 @@ public class UserProfile implements UserDetails {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
+    }
+
+    public int getPasswordPin() {
+        return passwordPin;
+    }
+
+    public void setPasswordPin(int passwordPin) {
+        this.passwordPin = passwordPin;
     }
 }
