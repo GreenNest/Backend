@@ -46,7 +46,7 @@ public class OrderDetails {
     @Column(name = "order_status", columnDefinition = "varchar(255) default 'Pending'")
     private String order_status;
 
-    @Column(name = "delete_status", columnDefinition = "integer default 1")
+    @Column(name = "delete_status", columnDefinition = "integer default 0")
     private int delete_status;
 
     @Column(name = "employee_id")

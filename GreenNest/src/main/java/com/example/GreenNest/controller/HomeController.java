@@ -8,6 +8,7 @@ import com.example.GreenNest.request.LoginResponse;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.COService;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.ProductService;
 import com.example.GreenNest.service.Utility;
@@ -96,6 +97,9 @@ public class HomeController {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private COService coService;
+
 
     @GetMapping("/user")
     public String home(){
@@ -133,20 +137,17 @@ public class HomeController {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-        System.out.println("*************");
-        System.out.println(authenticationRequest.getPassword());
-        System.out.println(authenticationRequest.getUserName());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
         String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
 
         int x = userProfile.getUser_id();
-        System.out.println(x);
+//        System.out.println(x);
 
         //Optional<Customer> customer = customerRepository.findById(x);
         Customer customer = customerRepository.findByProfile(userProfile);
         //Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-        System.out.println(customer.getFirst_name());
+//        System.out.println(customer.getFirst_name());
         LoginResponse response = new LoginResponse();
         response.setToken(jwtToken);
         List<String> role = customer.getProfile().getAuthorities().stream()
@@ -277,8 +278,14 @@ public class HomeController {
     public ResponseEntity<Object> getOrderList(@PathVariable("id") int id){
         try{
             Optional<Customer> customer = customerRepository.findById(id);
-            List<OrderDetails> orderDetails = orderDetailsRepository.findByCustomer(customer.get());
-            return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findByCustomer(customer.get());
+            var result = new ArrayList<OrderDetails>();
+            for(OrderDetails o: orderDetailsList){
+                if(o.getDelete_status() == 0){
+                    result.add(o);
+                }
+            }
+            return ResponseHandle.response("successfully get the orders", HttpStatus.OK, result);
 
         }catch (Exception e){
             return ResponseHandle.response("Your order history is empty.", HttpStatus.MULTI_STATUS, null);
@@ -329,10 +336,10 @@ public class HomeController {
 
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> resetPassword(HttpServletRequest request, @RequestParam("email") String userEmail) {
+    public ResponseEntity<Object> resetPassword(@RequestParam("email") String userEmail) {
         try {
             System.out.println(userEmail);
-            UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
+            UserProfile userProfile = userProfileRepository.findByEmail(userEmail.trim());
             if(userProfile == null){
                 return ResponseHandle.response("Invalid email", HttpStatus.BAD_REQUEST, null);
             }
@@ -383,13 +390,38 @@ public class HomeController {
     public ResponseEntity<Object> getUserPassword(@RequestParam("password") String userPassword, @RequestParam("email")String userEmail){
         UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
         if(userProfile != null){
-            System.out.println(userPassword);
-            System.out.println(userEmail);
-            userProfile.setPassword(bcryptEncoder.encode(userPassword));
+            userProfile.setPassword(bcryptEncoder.encode(userPassword.trim()));
+            //customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
             userProfile.setPasswordPin(0);
             userProfileRepository.save(userProfile);
             return ResponseHandle.response("Reset your password. Please login.", HttpStatus.OK, null);
         }
-        return ResponseHandle.response("user not found", HttpStatus.OK, null);
+        return ResponseHandle.response("user not found", HttpStatus.BAD_REQUEST, null);
+    }
+
+    //get the cash on delivery orders
+    @GetMapping(value = "/orders/cashOnDelivery")
+    public ResponseEntity<Object> getCashOnDeliveryOrders(){
+        List<OrderDetails> orderDetailsList1= orderDetailsRepository.findAll();
+        if(orderDetailsList1.isEmpty()){
+            return ResponseHandle.response("No cash on delivery orders.", HttpStatus.BAD_REQUEST, null);
+        }
+        ArrayList<COResponse> coResponses = coService.createCOResponses(orderDetailsList1);
+
+        return ResponseHandle.response("order details", HttpStatus.OK, coResponses);
+
+    }
+
+    //update the order status
+    @PutMapping(value = "/orderStatus/update/{id}/{status}")
+    public ResponseEntity<Object> updateOrderStatus(@PathVariable long id, @PathVariable boolean status){
+        OrderDetails orderDetails = orderDetailsRepository.findById(id);
+        if(status){
+            orderDetails.setOrder_status("Delivered");
+            OrderDetails orderDetails1 = orderDetailsRepository.save(orderDetails);
+            return ResponseHandle.response("Update the status.", HttpStatus.OK, orderDetails1);
+        }
+
+        return ResponseHandle.response("Order not found", HttpStatus.BAD_REQUEST, null);
     }
 }
