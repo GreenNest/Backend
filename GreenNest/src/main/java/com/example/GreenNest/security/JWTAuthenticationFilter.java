@@ -42,7 +42,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         //String authToken = jwtTokenHelper.getAuthHeaderFromHeader(request);
         String authToken = jwtTokenHelper.getToken(request);
-        System.out.println(authToken);
+        //System.out.println(authToken);
          if(null!=authToken){
              String userName = jwtTokenHelper.getUsernameFromToken(authToken);
 

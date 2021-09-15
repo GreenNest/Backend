@@ -7,7 +7,9 @@ import com.example.GreenNest.model.UserProfile;
 import com.example.GreenNest.repository.EmployeeRepository;
 import com.example.GreenNest.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,6 +19,9 @@ import java.util.List;
 @RequestMapping("/api/v1")
 @CrossOrigin(origins = "http://localhost:3000")
 public class EmployeeController {
+
+    @Autowired
+    private PasswordEncoder bcryptEncoder;
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -57,8 +62,6 @@ public class EmployeeController {
                         if (roles.get(j).getRoleCode().equals("worker")) {
                             filterList.add(empList.get(i));
                         }
-                    } else {
-                        System.out.println("theja");
                     }
                 }
             }
@@ -80,6 +83,29 @@ public class EmployeeController {
             return 1;
         }
         return 0;
+    }
+
+    //add employee
+    @PostMapping(value = "/employee", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean insertEmployee(@RequestBody Employee employee){
+        if(employee == null){
+            throw new ResourceNotFoundException("Missing Data Exception");
+        }
+        else{
+            System.out.println(employee.getUserProfile().getEmail());
+
+            List<String> employeeEmail = userProfileRepository.getProfile(employee.getUserProfile().getEmail());
+            System.out.println(employeeEmail);
+
+            if(employeeEmail.isEmpty()){
+                employee.getUserProfile().setPassword(bcryptEncoder.encode(employee.getUserProfile().getPassword()));
+                employeeRepository.save(employee);
+                return true;
+            }else{
+                System.out.println("already have an account");
+                return false;
+            }
+        }
     }
 
 }
