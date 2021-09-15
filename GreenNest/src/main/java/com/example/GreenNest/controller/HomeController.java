@@ -100,6 +100,13 @@ public class HomeController {
     @Autowired
     private COService coService;
 
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+
 
     @GetMapping("/user")
     public String home(){
@@ -142,23 +149,34 @@ public class HomeController {
         String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
 
         int x = userProfile.getUser_id();
-//        System.out.println(x);
-
-        //Optional<Customer> customer = customerRepository.findById(x);
-        Customer customer = customerRepository.findByProfile(userProfile);
-        //Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-//        System.out.println(customer.getFirst_name());
-        LoginResponse response = new LoginResponse();
-        response.setToken(jwtToken);
-        List<String> role = customer.getProfile().getAuthorities().stream()
+        List<String> roles = userProfile.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
+        System.out.println(roles);
+        if(roles.contains("customer")){
+            Customer customer = customerRepository.findByProfile(userProfile);
+            LoginResponse response = new LoginResponse();
+            response.setToken(jwtToken);
+            List<String> role = customer.getProfile().getAuthorities().stream()
+                    .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        System.out.println(role);
-        response.setRoles(role);
-        response.setName(customer.getFirst_name());
-        response.setId(customer.getCustomer_id());
+            response.setRoles(role);
+            response.setName(customer.getFirst_name());
+            response.setId(customer.getCustomer_id());
 
-        return  ResponseEntity.ok(response);
+            return  ResponseEntity.ok(response);
+        }else{
+            Employee employee = employeeRepository.findByUserProfile(userProfile);
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(jwtToken);
+            List<String> role1 = employee.getUserProfile().getAuthorities().stream()
+                    .map(item -> item.getAuthority()).collect(Collectors.toList());
+            loginResponse.setRoles(role1);
+            loginResponse.setName(employee.getFirst_name());
+            loginResponse.setEid(employee.getNic());
+
+            return ResponseEntity.ok(loginResponse);
+        }
+
     }
 
      //delete user
@@ -338,15 +356,15 @@ public class HomeController {
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> resetPassword(@RequestParam("email") String userEmail) {
         try {
-            System.out.println(userEmail);
+            //System.out.println(userEmail);
             UserProfile userProfile = userProfileRepository.findByEmail(userEmail.trim());
             if(userProfile == null){
                 return ResponseHandle.response("Invalid email", HttpStatus.BAD_REQUEST, null);
             }
-            System.out.println(userProfile.getEmail());
+            //System.out.println(userProfile.getEmail());
             Random rnd = new Random();
             int number = rnd.nextInt(999999) + 100000;
-            System.out.println(number);
+            //System.out.println(number);
 
             userProfile.setPasswordPin(number);
             userProfileRepository.save(userProfile);
@@ -415,13 +433,26 @@ public class HomeController {
     //update the order status
     @PutMapping(value = "/orderStatus/update/{id}/{status}")
     public ResponseEntity<Object> updateOrderStatus(@PathVariable long id, @PathVariable boolean status){
-        OrderDetails orderDetails = orderDetailsRepository.findById(id);
+        Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
         if(status){
-            orderDetails.setOrder_status("Delivered");
-            OrderDetails orderDetails1 = orderDetailsRepository.save(orderDetails);
-            return ResponseHandle.response("Update the status.", HttpStatus.OK, orderDetails1);
+            orderDetails.get().setOrder_status("Delivered");
+            OrderDetails orderDetails1 = orderDetailsRepository.save(orderDetails.get());
+            return ResponseHandle.response("Update the delivery status.", HttpStatus.OK,null);
         }
 
         return ResponseHandle.response("Order not found", HttpStatus.BAD_REQUEST, null);
     }
+
+    //add leave request
+//    @PostMapping(value = "/leave/add")
+//    public ResponseEntity<Object> addLeaveRequest(@RequestBody LeaveRequest leaveRequest){
+//        Optional<Customer> customer = customerRepository.findById(leaveRequest.getCustomer().getCustomer_id());
+//        if(customer.isPresent()){
+//            leaveRequest.setCustomer(customer.get());
+//            leaveRequestRepository.save(leaveRequest);
+//            return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+//        }
+//        return ResponseHandle.response("Invalid user", HttpStatus.BAD_REQUEST,null);
+//
+//    }
 }
