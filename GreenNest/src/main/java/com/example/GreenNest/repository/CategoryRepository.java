@@ -14,5 +14,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c.categoryName FROM Category c")
     ArrayList<String> getCategory();
 
+    @Query("SELECT c.categoryName FROM Category c WHERE c.categoryName = ?1")
+    String categoryGet(String categoryName);
 
 }
