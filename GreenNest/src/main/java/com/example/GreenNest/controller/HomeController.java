@@ -39,6 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.OpenOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -444,15 +448,129 @@ public class HomeController {
     }
 
     //add leave request
-//    @PostMapping(value = "/leave/add")
-//    public ResponseEntity<Object> addLeaveRequest(@RequestBody LeaveRequest leaveRequest){
-//        Optional<Customer> customer = customerRepository.findById(leaveRequest.getCustomer().getCustomer_id());
-//        if(customer.isPresent()){
-//            leaveRequest.setCustomer(customer.get());
-//            leaveRequestRepository.save(leaveRequest);
-//            return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
-//        }
-//        return ResponseHandle.response("Invalid user", HttpStatus.BAD_REQUEST,null);
-//
-//    }
+    @PostMapping(value = "/leave/add")
+    public ResponseEntity<Object> addLeaveRequest(@RequestBody LeaveRequest leaveRequest){
+        Optional<Employee> employee = employeeRepository.findById(leaveRequest.getEmployee().getNic());
+        if(employee.isPresent()){
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            //set data into variable
+            final String date1 = leaveRequest.getFromDate();
+            final String date2 = leaveRequest.getToDate();
+
+            //convert into date fromat
+            final LocalDate date3 = LocalDate.parse(date1 , formatter);
+            final LocalDate date4 = LocalDate.parse(date2, formatter);
+//            System.out.println(leaveRequest.getToDate());
+//            System.out.println(date3.getMonth().getValue());
+
+            //get the leave days
+            final long  days = ChronoUnit.DAYS.between(date3, date4);
+//            System.out.println(days);
+
+            //get the year and month
+            String name = date3.toString().substring(0,8);
+            leaveRequest.setEmployee(employee.get());
+//            System.out.println(name);
+
+            List<LeaveRequest> leaveRequests = leaveRequestRepository.findByFromDateContaining(name);
+            long totalRequests = 0;
+            for(LeaveRequest l : leaveRequests){
+                final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+
+                long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+                totalRequests = totalRequests+count;
+            }
+//            System.out.println("requests days "+totalRequests);
+            if(totalRequests >= 3){
+                return ResponseHandle.response("You exceed the number of leave requests", HttpStatus.OK,null);
+            }else{
+                if(3 - totalRequests >= days){
+                    leaveRequestRepository.save(leaveRequest);
+                    return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+                }
+                long difference = 3- totalRequests;
+                String message = "You can get only " + difference + " leave requests.";
+                return ResponseHandle.response(message, HttpStatus.OK,null);
+            }
+        }
+        return ResponseHandle.response("Invalid user", HttpStatus.BAD_REQUEST,null);
+
+    }
+
+    //Get the employee salary
+    @GetMapping(value = "/employee/salary/{type}")
+    public ResponseEntity<Object> getEmployeeSalary(@PathVariable("type") int type){
+        List<Employee> employeeList = employeeRepository.findAll();
+        List<SalaryResponse> salaryResponseList = new ArrayList<SalaryResponse>();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        for(Employee e : employeeList){
+            int status = e.getAccount_status();
+            if(status == 0) {
+                List<String> roles = e.getUserProfile().getAuthorities().stream()
+                        .map(item -> item.getAuthority()).collect(Collectors.toList());
+                List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
+                long totalLeaves = 0;
+                for(LeaveRequest l : leaveRequests){
+                    final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                    final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+                    long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+                    totalLeaves = totalLeaves+count;
+                }
+//                System.out.println(totalLeaves);
+                SalaryResponse salaryResponse = new SalaryResponse();
+                salaryResponse.setName(e.getFirst_name());
+                salaryResponse.setAddress(e.getAddress());
+                salaryResponse.setEmail(e.getUserProfile().getEmail());
+                salaryResponse.setMobile(e.getMobile());
+                salaryResponse.setNic(e.getNic());
+                if(type == 1) {
+                    if(roles.contains("moderator")){
+//                        List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
+//                        long totalLeaves = 0;
+//                        for(LeaveRequest l : leaveRequests){
+//                            final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+//                            final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+//                            long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+//                            totalLeaves = totalLeaves+count;
+//                        }
+//                        System.out.println(totalLeaves);
+                        long salary1 =  30000 - (500*totalLeaves);
+//                        SalaryResponse salaryResponse = new SalaryResponse();
+                        salaryResponse.setSalary(salary1);
+//                        salaryResponse.setName(e.getFirst_name());
+//                        salaryResponse.setAddress(e.getAddress());
+//                        salaryResponse.setEmail(e.getUserProfile().getEmail());
+//                        salaryResponse.setMobile(e.getMobile());
+//                        salaryResponse.setNic(e.getNic());
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 2) {
+                    if(roles.contains("accountant")){
+                        long salary2 =  40000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 3) {
+                    if(roles.contains("delivery-person")){
+                        long salary2 =  35000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 4) {
+                    if(roles.contains("worker")){
+                        long salary2 =  35000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }
+            }
+        }
+        return ResponseHandle.response("employee salary", HttpStatus.OK,salaryResponseList);
+    }
 }

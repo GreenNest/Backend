@@ -13,10 +13,10 @@ public class LeaveRequest {
     private long id;
 
     @Column(name = "from_date", columnDefinition = "DATE")
-    private Date fromDate;
+    private String fromDate;
 
     @Column(name = "to_date", columnDefinition = "DATE")
-    private Date toDate;
+    private String toDate;
 
     @Column(name="reason", columnDefinition = "TEXT")
     private String reason;
@@ -31,7 +31,7 @@ public class LeaveRequest {
     public LeaveRequest() {
     }
 
-    public LeaveRequest(Date fromDate, Date toDate, String reason, int approve) {
+    public LeaveRequest(String fromDate, String toDate, String reason, int approve) {
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.reason = reason;
@@ -46,19 +46,19 @@ public class LeaveRequest {
         this.id = id;
     }
 
-    public Date getFromDate() {
+    public String getFromDate() {
         return fromDate;
     }
 
-    public void setFromDate(Date fromDate) {
+    public void setFromDate(String fromDate) {
         this.fromDate = fromDate;
     }
 
-    public Date getToDate() {
+    public String getToDate() {
         return toDate;
     }
 
-    public void setToDate(Date toDate) {
+    public void setToDate(String toDate) {
         this.toDate = toDate;
     }
 
