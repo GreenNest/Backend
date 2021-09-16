@@ -5,27 +5,48 @@ import com.example.GreenNest.model.*;
 import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
+import com.example.GreenNest.request.OrderPlaceRequest;
 import com.example.GreenNest.request.ProductDetails;
-import com.example.GreenNest.response.CartResponse;
+import com.example.GreenNest.response.OrderPlaceResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
-import com.example.GreenNest.response.ReviewResponse;
+import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.CategoryService;
+import com.example.GreenNest.service.MyUserDetailsService;
+import com.example.GreenNest.service.OrderPlaceService;
+import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.ProductService;
+import com.example.GreenNest.service.Utility;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.OpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +55,7 @@ import java.util.stream.Collectors;
 //@CrossOrigin("*")
 @RequestMapping("/api/v1")
 @CrossOrigin(origins = "http://localhost:3000")
+@EnableTransactionManagement
 public class HomeController {
 
     @Autowired
@@ -69,6 +91,21 @@ public class HomeController {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
 
+    @Autowired
+    private ComplainRepository complainRepository;
+
+    @Autowired
+    private ForgetPasswordRepository forgetPasswordRepository;
+
+    @Autowired
+    private MessageSource messages;
+
+    @Autowired
+    private  Environment env;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
 
     @GetMapping("/user")
     public String home(){
@@ -82,7 +119,7 @@ public class HomeController {
 
     //add customer
     @PostMapping(value = "/customer", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> insertCustomer(@RequestBody Customer customer){
+    public Boolean insertCustomer(@RequestBody Customer customer){
         if(customer == null){
             throw new ResourceNotFoundException("Missing Data Exception");
         }
@@ -93,9 +130,9 @@ public class HomeController {
             if(username.isEmpty()){
                 customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
                 customerRepository.save(customer);
-                return ResponseEntity.ok("Successfully create an account");
+                return true;
             }else{
-                return ResponseEntity.badRequest().body("Email is already in use.");
+                return false;
             }
         }
 
@@ -106,25 +143,29 @@ public class HomeController {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-
+        System.out.println("*************");
+        System.out.println(authenticationRequest.getPassword());
+        System.out.println(authenticationRequest.getUserName());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
         String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
 
         int x = userProfile.getUser_id();
+        System.out.println(x);
 
-        Optional<Customer> customer = customerRepository.findById(x);
-        Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-        //System.out.println(customer.get().getFirst_name());
+        //Optional<Customer> customer = customerRepository.findById(x);
+        Customer customer = customerRepository.findByProfile(userProfile);
+        //Object[] roles = customer.get().getProfile().getAuthorities().toArray();
+        System.out.println(customer.getFirst_name());
         LoginResponse response = new LoginResponse();
         response.setToken(jwtToken);
-        List<String> role = customer.get().getProfile().getAuthorities().stream()
+        List<String> role = customer.getProfile().getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        //System.out.println(role);
+        System.out.println(role);
         response.setRoles(role);
-        response.setName(customer.get().getFirst_name());
-        response.setId(customer.get().getCustomer_id());
+        response.setName(customer.getFirst_name());
+        response.setId(customer.getCustomer_id());
 
         return  ResponseEntity.ok(response);
     }
@@ -166,7 +207,7 @@ public class HomeController {
             reviews.setCustomer(customer.get());
             reviews.setProduct(product.get());
             reviewRepository.save(reviews);
-            return ResponseHandle.response("successfully send the request", HttpStatus.OK, null);
+            return ResponseHandle.response("Thank you for the review.", HttpStatus.OK, null);
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -213,7 +254,6 @@ public class HomeController {
     @GetMapping(value = "/cart/get/{id}")
     public ResponseEntity<Object> getCartItems(@PathVariable("id") int id){
         try{
-            System.out.println(id);
             Optional<Customer> customer = customerRepository.findById(id);
             List<Cart> carts = cartRepository.findByCustomer(customer.get());
             List<CartResponse> cartResponses = new ArrayList<CartResponse>();
@@ -224,6 +264,7 @@ public class HomeController {
                 cartResponse.setQuantity(c.getQuantity());
                 cartResponse.setName(c.getProduct().getProduct_name());
                 cartResponse.setProduct_id(c.getProduct().getProduct_id());
+                cartResponse.setSinglePrice(c.getProduct().getPrice());
                 cartResponses.add(cartResponse);
             }
             return ResponseHandle.response("successfully send the request", HttpStatus.OK, cartResponses);
@@ -247,16 +288,127 @@ public class HomeController {
         try{
             Optional<Customer> customer = customerRepository.findById(id);
             List<OrderDetails> orderDetails = orderDetailsRepository.findByCustomer(customer.get());
-            if(orderDetails.isEmpty()){
-                return ResponseHandle.response("Order history is empty", HttpStatus.OK, null);
-            }else {
-                return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+            return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+
+        }catch (Exception e){
+            return ResponseHandle.response("Your order history is empty.", HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //get order items
+    @GetMapping(value = "/orderItems/get/{id}")
+    public ResponseEntity<Object> getOrderItems(@PathVariable("id") long id){
+        try{
+            Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
+            List<OrderItems> orderItems = orderItemRepository.findByOrderDetails(orderDetails.get());
+            List<OrderResponse> orderResponses = new ArrayList<OrderResponse>();
+            for(OrderItems o: orderItems){
+                OrderResponse orderResponse = new OrderResponse();
+                orderResponse.setImage(Base64.getEncoder().encodeToString(o.getProduct().getContent()));
+                orderResponse.setName(o.getProduct().getProduct_name());
+                orderResponse.setPrice(o.getProduct().getPrice());
+                orderResponse.setQuantity(o.getQuantity());
+                orderResponse.setProductId(o.getProduct().getProduct_id());
+                orderResponses.add(orderResponse);
             }
+
+            return ResponseHandle.response("", HttpStatus.MULTI_STATUS, orderResponses);
+
+        }catch (Exception e){
+            return ResponseHandle.response("Empty order items.", HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //add the order complain
+    @PostMapping(value = "/complain/add")
+    public ResponseEntity<Object> addOrderComplain(@RequestBody Complain complain){
+        try {
+            Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(complain.getOrderDetails().getOrder_id());
+            Optional<Customer> customer = customerRepository.findById(complain.getCustomer().getCustomer_id());
+
+            complain.setOrderDetails(orderDetails.get());
+            complain.setCustomer(customer.get());
+            complainRepository.save(complain);
+            return ResponseHandle.response("Add your complain.", HttpStatus.OK, null);
 
 
         }catch (Exception e){
+            return ResponseHandle.response("Empty order items.", HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //placeOrder
+
+    @Autowired
+    private OrderPlaceService service;
+
+    @PostMapping("/placeOrder")
+    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
+        return service.placeOrder(request);
+    }
+    //reset password
+    @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> resetPassword(HttpServletRequest request, @RequestParam("email") String userEmail) {
+        try {
+            System.out.println(userEmail);
+            UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
+            if(userProfile == null){
+                return ResponseHandle.response("Invalid email", HttpStatus.BAD_REQUEST, null);
+            }
+            System.out.println(userProfile.getEmail());
+            Random rnd = new Random();
+            int number = rnd.nextInt(999999) + 100000;
+            System.out.println(number);
+
+            userProfile.setPasswordPin(number);
+            userProfileRepository.save(userProfile);
+
+            sendMail(userEmail, number);
+
+                //mailSender.send(constructResetTokenEmail(getAppUrl(request), request.getLocale(), token, userProfile));
+            return ResponseHandle.response("We have sent the reset password link to your email.", HttpStatus.OK, null);
+
+
+        }catch ( Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
     }
 
+    private void sendMail( String email, int resetPasswordLink) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("mecare95@gmail.com", "Technical support");
+        helper.setTo(email);
+        String subject = "Here is the link to reset your password";
+        String content = "<p>Use this verification code "+ resetPasswordLink+" to reset your password</p>";
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        mailSender.send(message);
+    }
+
+    //get the OTP number
+    @GetMapping(value = "/verificationCode/get/{email}")
+    public ResponseEntity<Object> getVerificationCode(@PathVariable("email") String email){
+        UserProfile userProfile = userProfileRepository.findByEmail(email);
+        if(userProfile != null){
+            int code = userProfile.getPasswordPin();
+            return ResponseHandle.response("Verification code", HttpStatus.OK, code);
+        }
+        return ResponseHandle.response("User not found", HttpStatus.OK, null);
+    }
+
+    //update the current userpassword
+    @PutMapping(value = "/userPassword/get",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> getUserPassword(@RequestParam("password") String userPassword, @RequestParam("email")String userEmail){
+        UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
+        if(userProfile != null){
+            System.out.println(userPassword);
+            System.out.println(userEmail);
+            userProfile.setPassword(bcryptEncoder.encode(userPassword));
+            userProfile.setPasswordPin(0);
+            userProfileRepository.save(userProfile);
+            return ResponseHandle.response("Reset your password. Please login.", HttpStatus.OK, null);
+        }
+        return ResponseHandle.response("user not found", HttpStatus.OK, null);
+    }
 }
