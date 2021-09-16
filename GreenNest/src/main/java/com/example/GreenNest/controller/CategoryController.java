@@ -32,15 +32,18 @@ public class CategoryController {
     }
 
     //add category
-    @GetMapping("/addCategory/{id}")
-    public int addCategory(@PathVariable("id") String categoryName){
-        Category category = new Category();
-        category.setCategory_name(categoryName);
-        Category saveCategory = categoryRepository.save(category);
+    @GetMapping("/addCategory/{name}")
+    public int addCategory(@PathVariable("name") String name){
+        String categoryName = categoryRepository.categoryGet(name);
 
-        if(saveCategory.getCategory_name() != null){
+        if(categoryName == null) {
+            Category category = new Category();
+            category.setCategory_name(name);
+            categoryRepository.save(category);
+
             return 1;
+        } else {
+            return 0;
         }
-        return 0;
     }
 }
