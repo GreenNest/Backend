@@ -37,10 +37,10 @@ public class SupplierDetails {
 //    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id"), inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id"))
 //    private List<Category> categories;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
 //    @JsonIgnore
-    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false, updatable = false),
-            inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false, updatable = false))
+    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false))
     Set<Category> categories = new HashSet<>();
 
     public SupplierDetails() {

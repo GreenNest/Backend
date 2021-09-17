@@ -62,15 +62,17 @@ public class SupplierService {
         supplierDetails.setEmail(supplierRequest.getEmail());
         supplierDetails.setMobile(supplierRequest.getMobile());
         supplierRepository.save(supplierDetails);
+        System.out.println(supplierRequest.getCategories());
 
         List<Category> categories = new ArrayList<Category>();
 
         for(int i=0; i<supplierRequest.getCategories().size(); i++) {
             Category category = categoryRepository.findByCategoryName(supplierRequest.getCategories().get(i));
-            categories.add(category);
+//            categories.add(category);
+            supplierDetails.getCategories().add(category);
         }
 
-        supplierDetails.getCategories().addAll(categories);
+//        supplierDetails.getCategories().addAll(categories);
         supplierRepository.save(supplierDetails);
     }
 
