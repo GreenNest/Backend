@@ -30,7 +30,7 @@ public class SupplierDetails {
     @Column(name = "mobile")
     int mobile;
 
-    @Column(name = "account_status")
+    @Column(name = "account_status", columnDefinition = "integer default 0")
     int account_status;
 
 //    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

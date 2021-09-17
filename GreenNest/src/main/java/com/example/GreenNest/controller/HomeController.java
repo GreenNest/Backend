@@ -16,6 +16,7 @@ import com.example.GreenNest.service.MyUserDetailsService;
 import com.example.GreenNest.service.OrderPlaceService;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.COService;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.ProductService;
 import com.example.GreenNest.service.Utility;
@@ -47,6 +48,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.OpenOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -106,6 +111,16 @@ public class HomeController {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private COService coService;
+
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+
 
     @GetMapping("/user")
     public String home(){
@@ -143,31 +158,39 @@ public class HomeController {
 
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(), authenticationRequest.getPassword()));
-        System.out.println("*************");
-        System.out.println(authenticationRequest.getPassword());
-        System.out.println(authenticationRequest.getUserName());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
         String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
 
         int x = userProfile.getUser_id();
-        System.out.println(x);
-
-        //Optional<Customer> customer = customerRepository.findById(x);
-        Customer customer = customerRepository.findByProfile(userProfile);
-        //Object[] roles = customer.get().getProfile().getAuthorities().toArray();
-        System.out.println(customer.getFirst_name());
-        LoginResponse response = new LoginResponse();
-        response.setToken(jwtToken);
-        List<String> role = customer.getProfile().getAuthorities().stream()
+        List<String> roles = userProfile.getAuthorities().stream()
                 .map(item -> item.getAuthority()).collect(Collectors.toList());
+        System.out.println(roles);
+        if(roles.contains("customer")){
+            Customer customer = customerRepository.findByProfile(userProfile);
+            LoginResponse response = new LoginResponse();
+            response.setToken(jwtToken);
+            List<String> role = customer.getProfile().getAuthorities().stream()
+                    .map(item -> item.getAuthority()).collect(Collectors.toList());
 
-        System.out.println(role);
-        response.setRoles(role);
-        response.setName(customer.getFirst_name());
-        response.setId(customer.getCustomer_id());
+            response.setRoles(role);
+            response.setName(customer.getFirst_name());
+            response.setId(customer.getCustomer_id());
 
-        return  ResponseEntity.ok(response);
+            return  ResponseEntity.ok(response);
+        }else{
+            Employee employee = employeeRepository.findByUserProfile(userProfile);
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(jwtToken);
+            List<String> role1 = employee.getUserProfile().getAuthorities().stream()
+                    .map(item -> item.getAuthority()).collect(Collectors.toList());
+            loginResponse.setRoles(role1);
+            loginResponse.setName(employee.getFirst_name());
+            loginResponse.setEid(employee.getNic());
+
+            return ResponseEntity.ok(loginResponse);
+        }
+
     }
 
      //delete user
@@ -287,8 +310,14 @@ public class HomeController {
     public ResponseEntity<Object> getOrderList(@PathVariable("id") int id){
         try{
             Optional<Customer> customer = customerRepository.findById(id);
-            List<OrderDetails> orderDetails = orderDetailsRepository.findByCustomer(customer.get());
-            return ResponseHandle.response("successfully get the orders", HttpStatus.OK, orderDetails);
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findByCustomer(customer.get());
+            var result = new ArrayList<OrderDetails>();
+            for(OrderDetails o: orderDetailsList){
+                if(o.getDelete_status() == 0){
+                    result.add(o);
+                }
+            }
+            return ResponseHandle.response("successfully get the orders", HttpStatus.OK, result);
 
         }catch (Exception e){
             return ResponseHandle.response("Your order history is empty.", HttpStatus.MULTI_STATUS, null);
@@ -348,17 +377,17 @@ public class HomeController {
     }
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> resetPassword(HttpServletRequest request, @RequestParam("email") String userEmail) {
+    public ResponseEntity<Object> resetPassword(@RequestParam("email") String userEmail) {
         try {
-            System.out.println(userEmail);
-            UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
+            //System.out.println(userEmail);
+            UserProfile userProfile = userProfileRepository.findByEmail(userEmail.trim());
             if(userProfile == null){
                 return ResponseHandle.response("Invalid email", HttpStatus.BAD_REQUEST, null);
             }
-            System.out.println(userProfile.getEmail());
+            //System.out.println(userProfile.getEmail());
             Random rnd = new Random();
             int number = rnd.nextInt(999999) + 100000;
-            System.out.println(number);
+            //System.out.println(number);
 
             userProfile.setPasswordPin(number);
             userProfileRepository.save(userProfile);
@@ -402,13 +431,120 @@ public class HomeController {
     public ResponseEntity<Object> getUserPassword(@RequestParam("password") String userPassword, @RequestParam("email")String userEmail){
         UserProfile userProfile = userProfileRepository.findByEmail(userEmail);
         if(userProfile != null){
-            System.out.println(userPassword);
-            System.out.println(userEmail);
-            userProfile.setPassword(bcryptEncoder.encode(userPassword));
+            userProfile.setPassword(bcryptEncoder.encode(userPassword.trim()));
+            //customer.getProfile().setPassword(bcryptEncoder.encode(customer.getProfile().getPassword()));
             userProfile.setPasswordPin(0);
             userProfileRepository.save(userProfile);
             return ResponseHandle.response("Reset your password. Please login.", HttpStatus.OK, null);
         }
-        return ResponseHandle.response("user not found", HttpStatus.OK, null);
+        return ResponseHandle.response("user not found", HttpStatus.BAD_REQUEST, null);
     }
+
+    //get the cash on delivery orders
+    @GetMapping(value = "/orders/cashOnDelivery")
+    public ResponseEntity<Object> getCashOnDeliveryOrders(){
+        List<OrderDetails> orderDetailsList1= orderDetailsRepository.findAll();
+        if(orderDetailsList1.isEmpty()){
+            return ResponseHandle.response("No cash on delivery orders.", HttpStatus.BAD_REQUEST, null);
+        }
+        ArrayList<COResponse> coResponses = coService.createCOResponses(orderDetailsList1);
+
+        return ResponseHandle.response("order details", HttpStatus.OK, coResponses);
+
+    }
+
+    //update the order status
+    @PutMapping(value = "/orderStatus/update/{id}/{status}")
+    public ResponseEntity<Object> updateOrderStatus(@PathVariable long id, @PathVariable boolean status){
+        Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
+        if(status){
+            orderDetails.get().setOrder_status("Delivered");
+            OrderDetails orderDetails1 = orderDetailsRepository.save(orderDetails.get());
+            return ResponseHandle.response("Update the delivery status.", HttpStatus.OK,null);
+        }
+
+        return ResponseHandle.response("Order not found", HttpStatus.BAD_REQUEST, null);
+    }
+
+    //add leave request
+    @PostMapping(value = "/leave/add")
+    public ResponseEntity<Object> addLeaveRequest(@RequestBody LeaveRequest leaveRequest){
+        Optional<Employee> employee = employeeRepository.findById(leaveRequest.getEmployee().getNic());
+        if(employee.isPresent()){
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+            //set data into variable
+            final String date1 = leaveRequest.getFromDate();
+            final String date2 = leaveRequest.getToDate();
+
+            //convert into date fromat
+            final LocalDate date3 = LocalDate.parse(date1 , formatter);
+            final LocalDate date4 = LocalDate.parse(date2, formatter);
+//            System.out.println(leaveRequest.getToDate());
+//            System.out.println(date3.getMonth().getValue());
+
+            //get the leave days
+            final long  days = ChronoUnit.DAYS.between(date3, date4);
+//            System.out.println(days);
+
+            //get the year and month
+            String name = date3.toString().substring(0,8);
+            leaveRequest.setEmployee(employee.get());
+//            System.out.println(name);
+
+            //get the all requests related to the employee
+            List<LeaveRequest>  leaveRequestList = leaveRequestRepository.findByEmployee(employee.get());
+            List<LeaveRequest> leaveRequests = new ArrayList<LeaveRequest>();
+            for(LeaveRequest x : leaveRequestList){
+                String newDate1 = x.getFromDate();
+                String newDate2 = x.getToDate();
+                if(newDate1.contains(name) && newDate2.contains(name)){
+                    leaveRequests.add(x);
+                }
+            }
+            if(leaveRequests.isEmpty()){
+                leaveRequestRepository.save(leaveRequest);
+                return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+            }else{
+                long totalRequests = 0;
+                for(LeaveRequest l : leaveRequests){
+                    final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                    final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+
+                    long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+                    totalRequests = totalRequests+count;
+                }
+//            System.out.println("requests days "+totalRequests);
+                if(totalRequests >= 3){
+                    return ResponseHandle.response("You exceed the number of leave requests", HttpStatus.OK,null);
+                }else{
+                    if(3 - totalRequests >= days){
+                        leaveRequestRepository.save(leaveRequest);
+                        return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+                    }
+                    long difference = 3- totalRequests;
+                    String message = "You can get only " + difference + " leave requests.";
+                    return ResponseHandle.response(message, HttpStatus.OK,null);
+                }
+            }
+
+        }
+        return ResponseHandle.response("Invalid user", HttpStatus.BAD_REQUEST,null);
+
+    }
+
+    //send invoice
+    private void sendInvoice( String email) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("mecare95@gmail.com", "Order Invoice");
+        helper.setTo(email);
+        String subject = "Your Order Invoice";
+        String content = "<p>Use this verification code to reset your password</p> ";
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        mailSender.send(message);
+    }
+
+
 }

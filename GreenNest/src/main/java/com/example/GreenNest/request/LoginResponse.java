@@ -7,15 +7,17 @@ public class LoginResponse {
     private List<String> roles;
     private String name;
     private int id;
+    private String eid;
 
     public LoginResponse() {
     }
 
-    public LoginResponse(String token, List<String> roles, String name, int id) {
+    public LoginResponse(String token, List<String> roles, String name, int id, String eid) {
         this.token = token;
         this.roles = roles;
         this.name = name;
         this.id = id;
+        this.eid = eid;
     }
 
     public String getToken() {
@@ -48,5 +50,13 @@ public class LoginResponse {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getEid() {
+        return eid;
+    }
+
+    public void setEid(String eid) {
+        this.eid = eid;
     }
 }
