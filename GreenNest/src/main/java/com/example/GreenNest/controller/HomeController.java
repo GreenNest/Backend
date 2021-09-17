@@ -5,7 +5,15 @@ import com.example.GreenNest.model.*;
 import com.example.GreenNest.repository.*;
 import com.example.GreenNest.request.AuthenticationRequest;
 import com.example.GreenNest.request.LoginResponse;
+import com.example.GreenNest.request.OrderPlaceRequest;
 import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.response.OrderPlaceResponse;
+import com.example.GreenNest.response.ProductResponse;
+import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.security.JWTTokenHelper;
+import com.example.GreenNest.service.CategoryService;
+import com.example.GreenNest.service.MyUserDetailsService;
+import com.example.GreenNest.service.OrderPlaceService;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.COService;
@@ -29,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +60,7 @@ import java.util.stream.Collectors;
 //@CrossOrigin("*")
 @RequestMapping("/api/v1")
 @CrossOrigin(origins = "http://localhost:3000")
+@EnableTransactionManagement
 public class HomeController {
 
     @Autowired
@@ -356,6 +366,15 @@ public class HomeController {
         }
     }
 
+    //placeOrder
+
+    @Autowired
+    private OrderPlaceService service;
+
+    @PostMapping("/placeOrder")
+    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
+        return service.placeOrder(request);
+    }
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> resetPassword(@RequestParam("email") String userEmail) {

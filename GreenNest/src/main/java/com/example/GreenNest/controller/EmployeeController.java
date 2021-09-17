@@ -10,6 +10,9 @@ import com.example.GreenNest.repository.LeaveRequestRepository;
 import com.example.GreenNest.repository.UserProfileRepository;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.response.SalaryResponse;
+import com.example.GreenNest.response.DeliveryPersonResponse;
+import com.example.GreenNest.response.EmployeeResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -122,7 +126,7 @@ public class EmployeeController {
 
     //Get the employee salary
     @GetMapping(value = "/employee/salary/{type}")
-    public ResponseEntity<Object> getEmployeeSalary(@PathVariable("type") int type){
+    public ResponseEntity<Object> getEmployeeSalary(@PathVariable("type") int type) {
         List<Employee> employeeList = employeeRepository.findAll();
         List<Employee> employeeList1 = new ArrayList<Employee>();
         List<SalaryResponse> salaryResponseList = new ArrayList<SalaryResponse>();
@@ -130,30 +134,30 @@ public class EmployeeController {
         //get the today date
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate todayDate = LocalDate.now();
-        String name = todayDate.toString().substring(0,8);
+        String name = todayDate.toString().substring(0, 8);
 
-        for(Employee e : employeeList){
+        for (Employee e : employeeList) {
             int status = e.getAccount_status();
-            if(status == 0) {
+            if (status == 0) {
                 List<String> roles = e.getUserProfile().getAuthorities().stream()
                         .map(item -> item.getAuthority()).collect(Collectors.toList());
                 List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
                 List<LeaveRequest> leaveRequestList = new ArrayList<LeaveRequest>();
-                for(LeaveRequest x : leaveRequests){
+                for (LeaveRequest x : leaveRequests) {
                     String newDate1 = x.getFromDate();
                     String newDate2 = x.getToDate();
-                    if(newDate1.contains(name) && newDate2.contains(name)){
+                    if (newDate1.contains(name) && newDate2.contains(name)) {
                         leaveRequestList.add(x);
                     }
                 }
                 long totalLeaves = 0;
-                if(!leaveRequestList.isEmpty()){
+                if (!leaveRequestList.isEmpty()) {
 //                    System.out.println("leave list is not empty");
-                    for(LeaveRequest l : leaveRequestList){
-                        final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                    for (LeaveRequest l : leaveRequestList) {
+                        final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate(), formatter);
                         final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
                         long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
-                        totalLeaves = totalLeaves+count;
+                        totalLeaves = totalLeaves + count;
                     }
                 }
 
@@ -164,8 +168,8 @@ public class EmployeeController {
                 salaryResponse.setEmail(e.getUserProfile().getEmail());
                 salaryResponse.setMobile(e.getMobile());
                 salaryResponse.setNic(e.getNic());
-                if(type == 1) {
-                    if(roles.contains("moderator")){
+                if (type == 1) {
+                    if (roles.contains("moderator")) {
 //                        List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
 //                        long totalLeaves = 0;
 //                        for(LeaveRequest l : leaveRequests){
@@ -175,7 +179,7 @@ public class EmployeeController {
 //                            totalLeaves = totalLeaves+count;
 //                        }
 //                        System.out.println(totalLeaves);
-                        long salary1 =  30000 - (500*totalLeaves);
+                        long salary1 = 30000 - (500 * totalLeaves);
 //                        SalaryResponse salaryResponse = new SalaryResponse();
                         salaryResponse.setSalary(salary1);
 //                        salaryResponse.setName(e.getFirst_name());
@@ -186,23 +190,23 @@ public class EmployeeController {
 
                         salaryResponseList.add(salaryResponse);
                     }
-                }else if(type == 2) {
-                    if(roles.contains("accountant")){
-                        long salary2 =  40000 - (500*totalLeaves);
+                } else if (type == 2) {
+                    if (roles.contains("accountant")) {
+                        long salary2 = 40000 - (500 * totalLeaves);
                         salaryResponse.setSalary(salary2);
 
                         salaryResponseList.add(salaryResponse);
                     }
-                }else if(type == 3) {
-                    if(roles.contains("delivery-person")){
-                        long salary2 =  35000 - (500*totalLeaves);
+                } else if (type == 3) {
+                    if (roles.contains("delivery-person")) {
+                        long salary2 = 35000 - (500 * totalLeaves);
                         salaryResponse.setSalary(salary2);
 
                         salaryResponseList.add(salaryResponse);
                     }
-                }else if(type == 4) {
-                    if(roles.contains("worker")){
-                        long salary2 =  35000 - (500*totalLeaves);
+                } else if (type == 4) {
+                    if (roles.contains("worker")) {
+                        long salary2 = 35000 - (500 * totalLeaves);
                         salaryResponse.setSalary(salary2);
 
                         salaryResponseList.add(salaryResponse);
@@ -210,7 +214,68 @@ public class EmployeeController {
                 }
             }
         }
-        return ResponseHandle.response("employee salary", HttpStatus.OK,salaryResponseList);
+        return ResponseHandle.response("employee salary", HttpStatus.OK, salaryResponseList);
+    }
+    //get employee by nic
+    @GetMapping("/getEmployee/{nic}")
+    public Optional<Employee> getEmployeeByNIC(@PathVariable String nic) {
+        Optional<Employee> employee = employeeRepository.findById(nic);
+
+        return employee;
+    }
+
+    //edit employee
+    @PutMapping("/editEmployee/{nic}")
+    public int editEmployee(@PathVariable String nic, @RequestBody EmployeeResponse employeeResponse) {
+        String findNIC = employeeRepository.findIdByEmail(employeeResponse.getEmail());
+        System.out.println(findNIC);
+        System.out.println(nic);
+
+        if(findNIC == null || findNIC == nic) {
+            Employee employee = employeeRepository.findById(nic)
+                    .orElseThrow(() -> new ResourceNotFoundException("Employee not exist"));
+
+            employee.setFirst_name(employeeResponse.getFirst_name());
+            employee.setLast_name(employeeResponse.getLast_name());
+            employee.setAddress(employeeResponse.getAddress());
+            employee.getUserProfile().setEmail(employeeResponse.getEmail());
+            employee.setMobile(employeeResponse.getMobile());
+            employeeRepository.save(employee);
+
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    //get delivery persons
+    @GetMapping("/getDeliveryPersons")
+    public List<DeliveryPersonResponse> getDeliveryPersons() {
+        List<Employee> employees = employeeRepository.findAll();
+        List<DeliveryPersonResponse> deliveryPersonResponses = new ArrayList<DeliveryPersonResponse>();
+
+        for(int i=0; i<employees.size(); i++) {
+            int status = employees.get(i).getAccount_status();
+            if (status == 0) {
+                List<Authority> roles = (List<Authority>) employees.get(i).getUserProfile().getAuthorities();
+                for (int j = 0; j < roles.size(); j++) {
+                    if (roles.get(j).getRoleCode().equals("delivery-person")) {
+                        DeliveryPersonResponse deliveryPersonResponse = new DeliveryPersonResponse();
+
+                        deliveryPersonResponse.setNic(employees.get(i).getNic());
+                        deliveryPersonResponse.setFirst_name(employees.get(i).getFirst_name());
+                        deliveryPersonResponse.setLast_name(employees.get(i).getLast_name());
+                        deliveryPersonResponse.setAddress(employees.get(i).getAddress());
+                        deliveryPersonResponse.setEmail(employees.get(i).getUserProfile().getEmail());
+                        deliveryPersonResponse.setMobile(employees.get(i).getMobile());
+                        deliveryPersonResponse.setAvailable(employees.get(i).getAvailable());
+
+                        deliveryPersonResponses.add(deliveryPersonResponse);
+                    }
+                }
+            }
+        }
+        return deliveryPersonResponses;
     }
 
 }
