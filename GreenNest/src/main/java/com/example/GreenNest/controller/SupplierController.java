@@ -47,15 +47,15 @@ public class SupplierController {
 
     //add supplier
     @PostMapping("/addSupplier")
-    public int addSupplier(@RequestBody SupplierRequest supplierRequest) {
+    public boolean addSupplier(@RequestBody SupplierRequest supplierRequest) {
         String supplierEmail = supplierRepository.getProfileEmail(supplierRequest.getEmail());
         System.out.println(supplierEmail);
 
         if(supplierEmail == null) {
             supplierService.addSupplier(supplierRequest);
-            return 1;
+            return true;
         }else {
-            return 0;
+            return false;
         }
     }
 
