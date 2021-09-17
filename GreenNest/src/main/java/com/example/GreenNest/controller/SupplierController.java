@@ -48,7 +48,7 @@ public class SupplierController {
     //add supplier
     @PostMapping("/addSupplier")
     public int addSupplier(@RequestBody SupplierRequest supplierRequest) {
-        String supplierEmail = supplierRepository.getProfile(supplierRequest.getEmail());
+        String supplierEmail = supplierRepository.getProfileEmail(supplierRequest.getEmail());
         System.out.println(supplierEmail);
 
         if(supplierEmail == null) {
@@ -62,10 +62,10 @@ public class SupplierController {
     //edit supplier
     @PutMapping("/editSupplier/{id}")
     public int editSupplier(@RequestBody SupplierRequest supplierRequest, @PathVariable int id){
-        String supplierEmail = supplierRepository.getProfile(supplierRequest.getEmail());
-        System.out.println(supplierEmail);
+        int supplier_id = supplierRepository.getProfileId(supplierRequest.getEmail());
+        System.out.println(supplier_id);
 
-        if(supplierEmail == null) {
+        if(supplier_id == 0 || supplier_id == id) {
             SupplierDetails supplierDetails = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier not exist"));
 //          System.out.println(supplierRequest.getCategories());

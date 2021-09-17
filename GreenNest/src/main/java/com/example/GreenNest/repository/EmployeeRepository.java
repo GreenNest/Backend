@@ -11,5 +11,6 @@ import java.util.List;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
-
+    @Query("SELECT e.nic FROM Employee e WHERE e.userProfile.email = ?1")
+    String findIdByEmail(String email);
 }
