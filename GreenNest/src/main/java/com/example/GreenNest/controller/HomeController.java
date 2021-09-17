@@ -473,104 +473,59 @@ public class HomeController {
             leaveRequest.setEmployee(employee.get());
 //            System.out.println(name);
 
-            List<LeaveRequest> leaveRequests = leaveRequestRepository.findByFromDateContaining(name);
-            long totalRequests = 0;
-            for(LeaveRequest l : leaveRequests){
-                final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
-                final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
-
-                long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
-                totalRequests = totalRequests+count;
-            }
-//            System.out.println("requests days "+totalRequests);
-            if(totalRequests >= 3){
-                return ResponseHandle.response("You exceed the number of leave requests", HttpStatus.OK,null);
-            }else{
-                if(3 - totalRequests >= days){
-                    leaveRequestRepository.save(leaveRequest);
-                    return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+            //get the all requests related to the employee
+            List<LeaveRequest>  leaveRequestList = leaveRequestRepository.findByEmployee(employee.get());
+            List<LeaveRequest> leaveRequests = new ArrayList<LeaveRequest>();
+            for(LeaveRequest x : leaveRequestList){
+                String newDate1 = x.getFromDate();
+                String newDate2 = x.getToDate();
+                if(newDate1.contains(name) && newDate2.contains(name)){
+                    leaveRequests.add(x);
                 }
-                long difference = 3- totalRequests;
-                String message = "You can get only " + difference + " leave requests.";
-                return ResponseHandle.response(message, HttpStatus.OK,null);
             }
+            if(leaveRequests.isEmpty()){
+                leaveRequestRepository.save(leaveRequest);
+                return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+            }else{
+                long totalRequests = 0;
+                for(LeaveRequest l : leaveRequests){
+                    final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                    final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+
+                    long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+                    totalRequests = totalRequests+count;
+                }
+//            System.out.println("requests days "+totalRequests);
+                if(totalRequests >= 3){
+                    return ResponseHandle.response("You exceed the number of leave requests", HttpStatus.OK,null);
+                }else{
+                    if(3 - totalRequests >= days){
+                        leaveRequestRepository.save(leaveRequest);
+                        return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+                    }
+                    long difference = 3- totalRequests;
+                    String message = "You can get only " + difference + " leave requests.";
+                    return ResponseHandle.response(message, HttpStatus.OK,null);
+                }
+            }
+
         }
         return ResponseHandle.response("Invalid user", HttpStatus.BAD_REQUEST,null);
 
     }
 
-    //Get the employee salary
-    @GetMapping(value = "/employee/salary/{type}")
-    public ResponseEntity<Object> getEmployeeSalary(@PathVariable("type") int type){
-        List<Employee> employeeList = employeeRepository.findAll();
-        List<SalaryResponse> salaryResponseList = new ArrayList<SalaryResponse>();
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        for(Employee e : employeeList){
-            int status = e.getAccount_status();
-            if(status == 0) {
-                List<String> roles = e.getUserProfile().getAuthorities().stream()
-                        .map(item -> item.getAuthority()).collect(Collectors.toList());
-                List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
-                long totalLeaves = 0;
-                for(LeaveRequest l : leaveRequests){
-                    final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
-                    final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
-                    long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
-                    totalLeaves = totalLeaves+count;
-                }
-//                System.out.println(totalLeaves);
-                SalaryResponse salaryResponse = new SalaryResponse();
-                salaryResponse.setName(e.getFirst_name());
-                salaryResponse.setAddress(e.getAddress());
-                salaryResponse.setEmail(e.getUserProfile().getEmail());
-                salaryResponse.setMobile(e.getMobile());
-                salaryResponse.setNic(e.getNic());
-                if(type == 1) {
-                    if(roles.contains("moderator")){
-//                        List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
-//                        long totalLeaves = 0;
-//                        for(LeaveRequest l : leaveRequests){
-//                            final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
-//                            final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
-//                            long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
-//                            totalLeaves = totalLeaves+count;
-//                        }
-//                        System.out.println(totalLeaves);
-                        long salary1 =  30000 - (500*totalLeaves);
-//                        SalaryResponse salaryResponse = new SalaryResponse();
-                        salaryResponse.setSalary(salary1);
-//                        salaryResponse.setName(e.getFirst_name());
-//                        salaryResponse.setAddress(e.getAddress());
-//                        salaryResponse.setEmail(e.getUserProfile().getEmail());
-//                        salaryResponse.setMobile(e.getMobile());
-//                        salaryResponse.setNic(e.getNic());
-
-                        salaryResponseList.add(salaryResponse);
-                    }
-                }else if(type == 2) {
-                    if(roles.contains("accountant")){
-                        long salary2 =  40000 - (500*totalLeaves);
-                        salaryResponse.setSalary(salary2);
-
-                        salaryResponseList.add(salaryResponse);
-                    }
-                }else if(type == 3) {
-                    if(roles.contains("delivery-person")){
-                        long salary2 =  35000 - (500*totalLeaves);
-                        salaryResponse.setSalary(salary2);
-
-                        salaryResponseList.add(salaryResponse);
-                    }
-                }else if(type == 4) {
-                    if(roles.contains("worker")){
-                        long salary2 =  35000 - (500*totalLeaves);
-                        salaryResponse.setSalary(salary2);
-
-                        salaryResponseList.add(salaryResponse);
-                    }
-                }
-            }
-        }
-        return ResponseHandle.response("employee salary", HttpStatus.OK,salaryResponseList);
+    //send invoice
+    private void sendInvoice( String email) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        helper.setFrom("mecare95@gmail.com", "Order Invoice");
+        helper.setTo(email);
+        String subject = "Your Order Invoice";
+        String content = "<p>Use this verification code to reset your password</p> ";
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        mailSender.send(message);
     }
+
+
 }

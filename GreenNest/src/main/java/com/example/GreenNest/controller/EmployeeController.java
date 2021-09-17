@@ -3,17 +3,26 @@ package com.example.GreenNest.controller;
 import com.example.GreenNest.exception.ResourceNotFoundException;
 import com.example.GreenNest.model.Authority;
 import com.example.GreenNest.model.Employee;
+import com.example.GreenNest.model.LeaveRequest;
 import com.example.GreenNest.model.UserProfile;
 import com.example.GreenNest.repository.EmployeeRepository;
+import com.example.GreenNest.repository.LeaveRequestRepository;
 import com.example.GreenNest.repository.UserProfileRepository;
+import com.example.GreenNest.response.ResponseHandle;
+import com.example.GreenNest.response.SalaryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -28,6 +37,9 @@ public class EmployeeController {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
 
     //get all employees
     @GetMapping("/employees")
@@ -106,6 +118,99 @@ public class EmployeeController {
                 return false;
             }
         }
+    }
+
+    //Get the employee salary
+    @GetMapping(value = "/employee/salary/{type}")
+    public ResponseEntity<Object> getEmployeeSalary(@PathVariable("type") int type){
+        List<Employee> employeeList = employeeRepository.findAll();
+        List<Employee> employeeList1 = new ArrayList<Employee>();
+        List<SalaryResponse> salaryResponseList = new ArrayList<SalaryResponse>();
+
+        //get the today date
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate todayDate = LocalDate.now();
+        String name = todayDate.toString().substring(0,8);
+
+        for(Employee e : employeeList){
+            int status = e.getAccount_status();
+            if(status == 0) {
+                List<String> roles = e.getUserProfile().getAuthorities().stream()
+                        .map(item -> item.getAuthority()).collect(Collectors.toList());
+                List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
+                List<LeaveRequest> leaveRequestList = new ArrayList<LeaveRequest>();
+                for(LeaveRequest x : leaveRequests){
+                    String newDate1 = x.getFromDate();
+                    String newDate2 = x.getToDate();
+                    if(newDate1.contains(name) && newDate2.contains(name)){
+                        leaveRequestList.add(x);
+                    }
+                }
+                long totalLeaves = 0;
+                if(!leaveRequestList.isEmpty()){
+//                    System.out.println("leave list is not empty");
+                    for(LeaveRequest l : leaveRequestList){
+                        final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+                        final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+                        long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+                        totalLeaves = totalLeaves+count;
+                    }
+                }
+
+//                System.out.println(totalLeaves);
+                SalaryResponse salaryResponse = new SalaryResponse();
+                salaryResponse.setName(e.getFirst_name());
+                salaryResponse.setAddress(e.getAddress());
+                salaryResponse.setEmail(e.getUserProfile().getEmail());
+                salaryResponse.setMobile(e.getMobile());
+                salaryResponse.setNic(e.getNic());
+                if(type == 1) {
+                    if(roles.contains("moderator")){
+//                        List<LeaveRequest> leaveRequests = leaveRequestRepository.findByEmployee(e);
+//                        long totalLeaves = 0;
+//                        for(LeaveRequest l : leaveRequests){
+//                            final LocalDate leaveDate1 = LocalDate.parse(l.getFromDate() , formatter);
+//                            final LocalDate leaveDate2 = LocalDate.parse(l.getToDate(), formatter);
+//                            long count = ChronoUnit.DAYS.between(leaveDate1, leaveDate2);
+//                            totalLeaves = totalLeaves+count;
+//                        }
+//                        System.out.println(totalLeaves);
+                        long salary1 =  30000 - (500*totalLeaves);
+//                        SalaryResponse salaryResponse = new SalaryResponse();
+                        salaryResponse.setSalary(salary1);
+//                        salaryResponse.setName(e.getFirst_name());
+//                        salaryResponse.setAddress(e.getAddress());
+//                        salaryResponse.setEmail(e.getUserProfile().getEmail());
+//                        salaryResponse.setMobile(e.getMobile());
+//                        salaryResponse.setNic(e.getNic());
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 2) {
+                    if(roles.contains("accountant")){
+                        long salary2 =  40000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 3) {
+                    if(roles.contains("delivery-person")){
+                        long salary2 =  35000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }else if(type == 4) {
+                    if(roles.contains("worker")){
+                        long salary2 =  35000 - (500*totalLeaves);
+                        salaryResponse.setSalary(salary2);
+
+                        salaryResponseList.add(salaryResponse);
+                    }
+                }
+            }
+        }
+        return ResponseHandle.response("employee salary", HttpStatus.OK,salaryResponseList);
     }
 
 }
