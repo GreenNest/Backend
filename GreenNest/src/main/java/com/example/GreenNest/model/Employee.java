@@ -25,6 +25,9 @@ public class Employee {
     @Column(name = "account_status")
     int account_status;
 
+    @Column(name = "available", columnDefinition = "integer default 1")
+    int available;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "profile_id")
     UserProfile userProfile;
@@ -32,13 +35,14 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(String nic, String first_name, String last_name, String address, String mobile, int account_status, UserProfile userProfile) {
+    public Employee(String nic, String first_name, String last_name, String address, String mobile, int account_status, UserProfile userProfile, int available) {
         this.nic = nic;
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
         this.mobile = mobile;
         this.account_status = account_status;
+        this.available = available;
         this.userProfile = userProfile;
     }
 
@@ -88,6 +92,14 @@ public class Employee {
 
     public void setAccount_status(int account_status) {
         this.account_status = account_status;
+    }
+
+    public int getAvailable() {
+        return available;
+    }
+
+    public void setAvailable(int available) {
+        this.available = available;
     }
 
     public UserProfile getUserProfile() {
