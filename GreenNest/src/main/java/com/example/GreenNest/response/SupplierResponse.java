@@ -10,14 +10,14 @@ public class SupplierResponse {
     private String last_name;
     private String address;
     private String email;
-    private int mobile;
+    private String mobile;
     private int account_status;
     private ArrayList<CategoryResponse> categories;
 
     public SupplierResponse() {
     }
 
-    public SupplierResponse(int id, String first_name, String last_name, String address, String email, int mobile, int account_status, ArrayList<CategoryResponse> categories) {
+    public SupplierResponse(int id, String first_name, String last_name, String address, String email, String mobile, int account_status, ArrayList<CategoryResponse> categories) {
         this.id = id;
         this.first_name = first_name;
         this.last_name = last_name;
@@ -68,11 +68,11 @@ public class SupplierResponse {
         this.email = email;
     }
 
-    public int getMobile() {
+    public String getMobile() {
         return mobile;
     }
 
-    public void setMobile(int mobile) {
+    public void setMobile(String mobile) {
         this.mobile = mobile;
     }
 
