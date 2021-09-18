@@ -9,6 +9,7 @@ public class OrderResponse {
     private int quantity;
     private double subtotal;
     private long productId;
+
     public OrderResponse() {
     }
 

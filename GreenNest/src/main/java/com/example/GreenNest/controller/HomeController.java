@@ -24,6 +24,9 @@ import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,15 +41,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -339,6 +347,7 @@ public class HomeController {
                 orderResponse.setQuantity(o.getQuantity());
                 orderResponse.setProductId(o.getProduct().getProduct_id());
                 orderResponses.add(orderResponse);
+
             }
 
             return ResponseHandle.response("", HttpStatus.MULTI_STATUS, orderResponses);
@@ -446,10 +455,13 @@ public class HomeController {
         List<OrderDetails> orderDetailsList1= orderDetailsRepository.findAll();
         if(orderDetailsList1.isEmpty()){
             return ResponseHandle.response("No cash on delivery orders.", HttpStatus.BAD_REQUEST, null);
+        }else{
+            ArrayList<COResponse> coResponses = coService.createCOResponses(orderDetailsList1);
+            if(coResponses.isEmpty()){
+                return ResponseHandle.response("No cash on delivery orders.", HttpStatus.BAD_REQUEST, null);
+            }
+            return ResponseHandle.response("order details", HttpStatus.OK, coResponses);
         }
-        ArrayList<COResponse> coResponses = coService.createCOResponses(orderDetailsList1);
-
-        return ResponseHandle.response("order details", HttpStatus.OK, coResponses);
 
     }
 
@@ -503,8 +515,13 @@ public class HomeController {
                 }
             }
             if(leaveRequests.isEmpty()){
-                leaveRequestRepository.save(leaveRequest);
-                return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+                if(days <= 3){
+                    leaveRequestRepository.save(leaveRequest);
+                    return ResponseHandle.response("Send the leave request", HttpStatus.OK,null);
+                }
+                return ResponseHandle.response("You can get only 3 leave requests.", HttpStatus.OK,null);
+
+
             }else{
                 long totalRequests = 0;
                 for(LeaveRequest l : leaveRequests){
@@ -533,17 +550,61 @@ public class HomeController {
 
     }
 
+    //get order details by id
+    @GetMapping(value = "/get/invoiceDetails/{id}")
+    public ResponseEntity<Object> getOrderDetailsById(@PathVariable("id") long id){
+        Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
+        InvoiceData invoiceData = new InvoiceData();
+        invoiceData.setCustomer_name(orderDetails.get().getCustomer().getFirst_name());
+        invoiceData.setDate(orderDetails.get().getDate());
+        invoiceData.setAddress1(orderDetails.get().getAddress_line1());
+        invoiceData.setAddress2(orderDetails.get().getGetAddress_line2());
+        invoiceData.setTown(orderDetails.get().getCity());
+
+        List<OrderItems> orderItemsList = orderItemRepository.findByOrderDetails(orderDetails.get());
+        List<OrderResponse> orderResponses = new ArrayList<OrderResponse>();
+        for (OrderItems o: orderItemsList){
+            OrderResponse orderResponse = new OrderResponse();
+            orderResponse.setName(o.getProduct().getProduct_name());
+            orderResponse.setPrice(o.getProduct().getPrice());
+            orderResponse.setQuantity(o.getQuantity());
+            orderResponses.add(orderResponse);
+        }
+        invoiceData.setOrderResponses(orderResponses);
+
+        return ResponseHandle.response("Invalid user", HttpStatus.OK, invoiceData);
+
+
+    }
+
     //send invoice
-    private void sendInvoice( String email) throws MessagingException, UnsupportedEncodingException {
+    @PostMapping(value = "/invoice/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Object> sendInvoice( @RequestParam("invoice") MultipartFile multipartFile, @RequestParam("id") long id) throws MessagingException, UnsupportedEncodingException {
+        Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
+        System.out.println(id);
+        System.out.println(orderDetails.get().getCustomer().getProfile().getEmail());
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-        helper.setFrom("mecare95@gmail.com", "Order Invoice");
-        helper.setTo(email);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom("greennest06@gmail.com", "Order Invoice");
+        helper.setTo(orderDetails.get().getCustomer().getProfile().getEmail());
         String subject = "Your Order Invoice";
-        String content = "<p>Use this verification code to reset your password</p> ";
+        String content = "<p>Hi "+ orderDetails.get().getCustomer().getFirst_name() + "</p> " +
+                "<p>Thanks for your order. Its on build until we confirm that payment has been received.</p>";
+
         helper.setSubject(subject);
         helper.setText(content, true);
-        mailSender.send(message);
+        if (!multipartFile.isEmpty()) {
+            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            InputStreamSource source = new InputStreamSource() {
+                public InputStream getInputStream() throws IOException {
+                    return multipartFile.getInputStream();
+                }
+            };
+            helper.addAttachment(fileName, source );
+            //helper.addInline("image001", new File(fileName));
+            //mailSender.send(message);
+        }
+        return ResponseHandle.response("Send the invoice to the customer", HttpStatus.OK, null);
     }
 
 

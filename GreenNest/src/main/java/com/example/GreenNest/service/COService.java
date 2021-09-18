@@ -19,15 +19,19 @@ public class COService {
     public ArrayList<COResponse> createCOResponses (List<OrderDetails> orderDetails){
         ArrayList<COResponse> coResponses = new ArrayList<COResponse>();
         for(OrderDetails o : orderDetails){
-            List<OrderItems> orderItems = orderItemRepository.findByOrderDetails(o);
-            if(o.getDelete_status() == 0){
-                COResponse coResponse = new COResponse();
-                coResponse.setCost(o.getTotal_price());
-                coResponse.setDate(o.getDate());
-                coResponse.setId(o.getOrder_id());
-                coResponse.setItems(orderItems.size());
-                coResponses.add(coResponse);
+            if(o.getOrder_type().equals("cash on delivery")){
+                List<OrderItems> orderItems = orderItemRepository.findByOrderDetails(o);
+                if(o.getDelete_status() == 0){
+                    COResponse coResponse = new COResponse();
+                    coResponse.setCost(o.getTotal_price());
+                    coResponse.setDate(o.getDate());
+                    coResponse.setId(o.getOrder_id());
+                    coResponse.setItems(orderItems.size());
+                    coResponse.setStatus(o.getOrder_status());
+                    coResponses.add(coResponse);
+                }
             }
+
         }
         return coResponses;
     }

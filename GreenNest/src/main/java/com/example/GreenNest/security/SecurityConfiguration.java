@@ -65,7 +65,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                                 "/api/v1/get/categories","/api/v1/product/{category}","/api/v1/request/add","/api/v1/reviews/add","/api/v1/cart/add",
                                 "/api/v1/order/get/{id}","/api/v1/orderItems/get/{id}","/api/v1/complain/add","/api/v1/customer/resetPassword","/api/v1/verificationCode/get/{email}","/api/v1/userPassword/get",
-                                "/api/v1/orders/cashOnDelivery","/api/v1/orderStatus/update/{id}/{status}","/api/v1/employee/salary/{type}",
+                                "/api/v1/orders/cashOnDelivery","/api/v1/orderStatus/update/{id}/{status}","/api/v1/employee/salary/{type}", "/api/v1/invoice/send", "/api/v1/get/invoiceDetails/{id}",
                                 "/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/addCategory/{id}",
                                 "/api/v1/product/update/{id}/{amount}", "/api/v1/getSuppliers","/api/v1/order/get/{id}", "/api/v1/suppliersByCategory",
                                 "/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/getCategories","/api/v1/addCategory/{id}","/api/v1/product/{id}","/api/v1/deleteProduct/{id}",
