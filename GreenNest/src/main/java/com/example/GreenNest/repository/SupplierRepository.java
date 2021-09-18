@@ -12,7 +12,7 @@ import java.util.List;
 public interface SupplierRepository extends JpaRepository<SupplierDetails, Integer> {
 
     @Query("SELECT s.supplier_id FROM SupplierDetails s WHERE s.email = ?1")
-    int getProfileId(String email);
+    String getProfileId(String email);
 
     @Query("SELECT s.email FROM SupplierDetails s WHERE s.email = ?1")
     String getProfileEmail(String email);

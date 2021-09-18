@@ -228,10 +228,8 @@ public class EmployeeController {
     @PutMapping("/editEmployee/{nic}")
     public int editEmployee(@PathVariable String nic, @RequestBody EmployeeResponse employeeResponse) {
         String findNIC = employeeRepository.findIdByEmail(employeeResponse.getEmail());
-        System.out.println(findNIC);
-        System.out.println(nic);
 
-        if(findNIC == null || findNIC == nic) {
+        if(findNIC == null || findNIC.equals(nic)) {
             Employee employee = employeeRepository.findById(nic)
                     .orElseThrow(() -> new ResourceNotFoundException("Employee not exist"));
 
