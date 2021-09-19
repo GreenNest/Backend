@@ -15,13 +15,16 @@ public class OrderRequest {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
+    @Column(name = "accept_description",  nullable = false, columnDefinition = "varchar(255) default 'we can supply your order'")
+    private String accept_description;
+
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "delete_status", columnDefinition = "integer default 1")
+    @Column(name = "delete_status", columnDefinition = "integer default 0")
     private int  deleteStatus;
 
     @Column(name = "check_status", columnDefinition = "integer default 0")
@@ -34,8 +37,9 @@ public class OrderRequest {
     public OrderRequest() {
     }
 
-    public OrderRequest(String description, int quantity, String productName, int deleteStatus, int checkStatus) {
+    public OrderRequest(String description, String accept_description, int quantity, String productName, int deleteStatus, int checkStatus) {
         this.description = description;
+        this.accept_description = accept_description;
         this.quantity = quantity;
         this.productName = productName;
         this.deleteStatus = deleteStatus;
@@ -56,6 +60,14 @@ public class OrderRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAccept_description() {
+        return accept_description;
+    }
+
+    public void setAccept_description(String accept_description) {
+        this.accept_description = accept_description;
     }
 
     public int getQuantity() {
