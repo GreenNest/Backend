@@ -346,6 +346,7 @@ public class HomeController {
     public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
         return service.placeOrder(request);
     }
+
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> resetPassword(HttpServletRequest request, @RequestParam("email") String userEmail) {
