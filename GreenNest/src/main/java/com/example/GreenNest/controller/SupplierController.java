@@ -62,10 +62,10 @@ public class SupplierController {
     //edit supplier
     @PutMapping("/editSupplier/{id}")
     public int editSupplier(@RequestBody SupplierRequest supplierRequest, @PathVariable int id){
-        int supplier_id = supplierRepository.getProfileId(supplierRequest.getEmail());
-        System.out.println(supplier_id);
+        String supplier_id = supplierRepository.getProfileId(supplierRequest.getEmail());
+        String s_id = Integer.toString(id);
 
-        if(supplier_id == 0 || supplier_id == id) {
+        if(supplier_id.equals(s_id) || supplier_id == null) {
             SupplierDetails supplierDetails = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier not exist"));
 //          System.out.println(supplierRequest.getCategories());

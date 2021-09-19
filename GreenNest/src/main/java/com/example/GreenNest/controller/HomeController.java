@@ -607,5 +607,42 @@ public class HomeController {
         return ResponseHandle.response("Send the invoice to the customer", HttpStatus.OK, null);
     }
 
+    //get order count of every month
+    @GetMapping(value = "/order/getCount")
+    public ResponseEntity<Object> getOrderCountOfMoth(){
+
+        List<OrderDetails> orderDetailsList = orderDetailsRepository.findAll();
+        int count1 = 0;
+        int count2 = 0;
+        int count3 = 0;
+        int count4 = 0;
+        int count5 = 0;
+        for(OrderDetails o : orderDetailsList){
+            //System.out.println(o.getDate());
+            if(o.getDate().toString().contains("-01-")){
+                count1++;
+            }
+            if(o.getDate().toString().contains("-02-")){
+                count2++;
+            }
+            if(o.getDate().toString().contains("-03-")){
+                count3++;
+            }
+            if(o.getDate().toString().contains("-08-")){
+                count4++;
+            }
+
+        }
+        List<Integer> data = new ArrayList<Integer>();
+        data.add(count1);
+        data.add(count2);
+        data.add(count3);
+        data.add(count4);
+
+
+
+        return ResponseHandle.response("Send the invoice to the customer", HttpStatus.OK, data);
+    }
+
 
 }

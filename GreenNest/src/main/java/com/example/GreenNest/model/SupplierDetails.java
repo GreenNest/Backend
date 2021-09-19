@@ -28,7 +28,7 @@ public class SupplierDetails {
     String email;
 
     @Column(name = "mobile")
-    int mobile;
+    String mobile;
 
     @Column(name = "account_status", columnDefinition = "integer default 0")
     int account_status;
@@ -37,16 +37,16 @@ public class SupplierDetails {
 //    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id"), inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id"))
 //    private List<Category> categories;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
 //    @JsonIgnore
-    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false, updatable = false),
-            inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false, updatable = false))
+    @JoinTable(name = "supplier_category", joinColumns = @JoinColumn(referencedColumnName = "supplier_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false))
     Set<Category> categories = new HashSet<>();
 
     public SupplierDetails() {
     }
 
-    public SupplierDetails(String first_name, String last_name, String address, String email, int mobile, int account_status) {
+    public SupplierDetails(String first_name, String last_name, String address, String email, String mobile, int account_status) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
@@ -95,11 +95,11 @@ public class SupplierDetails {
         this.email = email;
     }
 
-    public int getMobile() {
+    public String getMobile() {
         return mobile;
     }
 
-    public void setMobile(int mobile) {
+    public void setMobile(String mobile) {
         this.mobile = mobile;
     }
 
