@@ -43,7 +43,7 @@ public class Product {
     @Column(name = "image3",columnDefinition = "LONGBLOB")
     byte[] image3;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @JoinTable(name = "ProductCategory", joinColumns = @JoinColumn(referencedColumnName = "product_id", nullable = false),
     inverseJoinColumns = @JoinColumn(referencedColumnName = "category_id", nullable = false))
     Set<Category> categories = new HashSet<>();
