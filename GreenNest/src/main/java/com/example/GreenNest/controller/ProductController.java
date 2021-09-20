@@ -2,15 +2,13 @@ package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
 import com.example.GreenNest.model.Category;
+import com.example.GreenNest.model.OrderRequest;
 import com.example.GreenNest.model.Product;
 import com.example.GreenNest.model.SupplierDetails;
 import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.ProductRepository;
 import com.example.GreenNest.request.ProductDetails;
-import com.example.GreenNest.response.CategoryResponse;
-import com.example.GreenNest.response.ProductResponse;
-import com.example.GreenNest.response.ResponseHandle;
-import com.example.GreenNest.response.SupplierResponse;
+import com.example.GreenNest.response.*;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,6 +102,37 @@ public class ProductController {
         product.setQuantity(amount);
         Product product1 = productRepository.save(product);
         return product1.getQuantity() == amount;
+    }
+
+    //update stock
+    @PutMapping("/updateStock/{productName}/{quantity}")
+    public int updateStock(@PathVariable String productName, @PathVariable int quantity){
+        long product_id = productRepository.requestProduct(productName);
+        Product product = productRepository.findById(product_id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not exist"));
+        int total_amount = product.getQuantity() + quantity;
+        product.setQuantity(total_amount);
+        productRepository.save(product);
+
+        return 1;
+    }
+
+    //get reorder level
+    @GetMapping("/getReorderLevel")
+    public List<ReorderLevelResponse> getReorderLevelProducts() {
+        List<ReorderLevelResponse> reorderLevelResponses = new ArrayList<ReorderLevelResponse>();
+        List<Product> products = productRepository.reorderLevel();
+        for(Product p: products) {
+            if(p.getProduct_status() == 0) {
+                ReorderLevelResponse reorderLevelResponse = new ReorderLevelResponse();
+                reorderLevelResponse.setId(p.getProduct_id());
+                reorderLevelResponse.setName(p.getProduct_name());
+                reorderLevelResponse.setAmount(p.getQuantity());
+                reorderLevelResponse.setReorder_level(p.getReorder_level());
+                reorderLevelResponses.add(reorderLevelResponse);
+            }
+        }
+        return reorderLevelResponses;
     }
 
 }

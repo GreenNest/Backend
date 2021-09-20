@@ -384,6 +384,7 @@ public class HomeController {
     public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
         return service.placeOrder(request);
     }
+
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> resetPassword(@RequestParam("email") String userEmail) {
@@ -770,7 +771,7 @@ public class HomeController {
     public ResponseEntity<Object> getCustomerOrderRequest(@PathVariable("id") int id){
         Optional<Customer> customer = customerRepository.findById(id);
         List<OrderRequest> orderRequestList = orderRequestRepository.findByCustomer(customer.get());
-        return ResponseHandle.response("Get the all requests", HttpStatus.BAD_REQUEST, orderRequestList);
+        return ResponseHandle.response("Get the all requests", HttpStatus.OK, orderRequestList);
 
     }
 
