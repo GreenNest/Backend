@@ -25,14 +25,11 @@ public class OrderDetails {
     @Column(name = "date", columnDefinition = "DATE")
     private Date date;
 
-    @Column(name = "address_line1")
-    private String address_line1;
+    @Column(name = "address")
+    private String address;
 
-    @Column(name = "address_line2")
-    private String getAddress_line2;
-
-    @Column(name = "district")
-    private String district;
+    @Column(name = "state")
+    private String state;
 
     @Column(name = "city")
     private String city;
@@ -66,14 +63,13 @@ public class OrderDetails {
     public OrderDetails() {
     }
 
-    public OrderDetails(long order_id, String order_type, double total_price, Date date, String address_line1, String getAddress_line2, String district, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
+    public OrderDetails(long order_id, String order_type, double total_price, Date date, String address, String state, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
         this.order_id = order_id;
         this.order_type = order_type;
         this.total_price = total_price;
         this.date = date;
-        this.address_line1 = address_line1;
-        this.getAddress_line2 = getAddress_line2;
-        this.district = district;
+        this.address = address;
+        this.state = state;
         this.city = city;
         this.postal_code = postal_code;
         this.mobile = mobile;
@@ -116,28 +112,20 @@ public class OrderDetails {
         this.date = date;
     }
 
-    public String getAddress_line1() {
-        return address_line1;
+    public String getAddress() {
+        return address;
     }
 
-    public void setAddress_line1(String address_line1) {
-        this.address_line1 = address_line1;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public String getGetAddress_line2() {
-        return getAddress_line2;
+    public String getState() {
+        return state;
     }
 
-    public void setGetAddress_line2(String getAddress_line2) {
-        this.getAddress_line2 = getAddress_line2;
-    }
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(String district) {
-        this.district = district;
+    public void setState(String state) {
+        this.state = state;
     }
 
     public String getCity() {
