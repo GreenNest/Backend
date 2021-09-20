@@ -73,7 +73,7 @@ public class ProductController {
             ProductResponse productResponse = productService.getSingleProduct(id);
             return ResponseHandle.response("successfully get the product", HttpStatus.OK, productResponse);
         }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
 
     }

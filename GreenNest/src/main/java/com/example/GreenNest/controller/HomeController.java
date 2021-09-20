@@ -328,7 +328,7 @@ public class HomeController {
             return ResponseHandle.response("successfully get the orders", HttpStatus.OK, result);
 
         }catch (Exception e){
-            return ResponseHandle.response("Your order history is empty.", HttpStatus.MULTI_STATUS, null);
+            return ResponseHandle.response("Your order history is empty.", HttpStatus.BAD_REQUEST, null);
         }
     }
 
@@ -766,5 +766,12 @@ public class HomeController {
         return ResponseHandle.response("Get the order count", HttpStatus.OK, data);
     }
 
+    @GetMapping(value = "customer/orderRequest/{id}")
+    public ResponseEntity<Object> getCustomerOrderRequest(@PathVariable("id") int id){
+        Optional<Customer> customer = customerRepository.findById(id);
+        List<OrderRequest> orderRequestList = orderRequestRepository.findByCustomer(customer.get());
+        return ResponseHandle.response("Get the all requests", HttpStatus.BAD_REQUEST, orderRequestList);
+
+    }
 
 }
