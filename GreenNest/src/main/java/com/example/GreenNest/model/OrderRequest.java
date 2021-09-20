@@ -15,20 +15,23 @@ public class OrderRequest {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    @Column(name = "accept_description",  nullable = false, columnDefinition = "varchar(255) default 'we can supply your order'")
-    private String accept_description;
-
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
     @Column(name = "product_name", nullable = false)
     private String productName;
 
-    @Column(name = "delete_status", columnDefinition = "integer default 0")
-    private int  deleteStatus;
+    @Column(name = "moderatorDelete", columnDefinition = "integer default 0")
+    private int  moderatorDelete;
 
-    @Column(name = "check_status", columnDefinition = "integer default 0")
-    private int checkStatus;
+    @Column(name = "customerDelete", columnDefinition = "integer default 0")
+    private int customerDelete;
+
+    @Column(name = "moderatorAccept", columnDefinition = "integer default 0")
+    private int  moderatorAccept;
+
+    @Column(name = "customerAccept", columnDefinition = "integer default 0")
+    private int customerAccept;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "customer_id")
@@ -37,13 +40,14 @@ public class OrderRequest {
     public OrderRequest() {
     }
 
-    public OrderRequest(String description, String accept_description, int quantity, String productName, int deleteStatus, int checkStatus) {
-        this.description = description;
-        this.accept_description = accept_description;
+    public OrderRequest(String description, int quantity, String productName, int moderatorDelete, int customerDelete, int moderatorAccept, int customerAccept) {
+        this.description = description;;
         this.quantity = quantity;
         this.productName = productName;
-        this.deleteStatus = deleteStatus;
-        this.checkStatus = checkStatus;
+        this.moderatorDelete = moderatorDelete;
+        this.customerDelete = customerDelete;
+        this.moderatorAccept = moderatorAccept;
+        this.customerAccept = customerAccept;
     }
 
     public long getId() {
@@ -62,14 +66,6 @@ public class OrderRequest {
         this.description = description;
     }
 
-    public String getAccept_description() {
-        return accept_description;
-    }
-
-    public void setAccept_description(String accept_description) {
-        this.accept_description = accept_description;
-    }
-
     public int getQuantity() {
         return quantity;
     }
@@ -86,20 +82,36 @@ public class OrderRequest {
         this.productName = productName;
     }
 
-    public int getDeleteStatus() {
-        return deleteStatus;
+    public int getModeratorDelete() {
+        return moderatorDelete;
     }
 
-    public void setDeleteStatus(int deleteStatus) {
-        this.deleteStatus = deleteStatus;
+    public void setModeratorDelete(int moderatorDelete) {
+        this.moderatorDelete = moderatorDelete;
     }
 
-    public int getCheckStatus() {
-        return checkStatus;
+    public int getCustomerDelete() {
+        return customerDelete;
     }
 
-    public void setCheckStatus(int checkStatus) {
-        this.checkStatus = checkStatus;
+    public void setCustomerDelete(int customerDelete) {
+        this.customerDelete = customerDelete;
+    }
+
+    public int getModeratorAccept() {
+        return moderatorAccept;
+    }
+
+    public void setModeratorAccept(int moderatorAccept) {
+        this.moderatorAccept = moderatorAccept;
+    }
+
+    public int getCustomerAccept() {
+        return customerAccept;
+    }
+
+    public void setCustomerAccept(int customerAccept) {
+        this.customerAccept = customerAccept;
     }
 
     public Customer getCustomer() {
