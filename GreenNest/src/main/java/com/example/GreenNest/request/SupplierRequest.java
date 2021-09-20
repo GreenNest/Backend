@@ -9,14 +9,14 @@ public class SupplierRequest {
     private String last_name;
     private String address;
     private String email;
-    private int mobile;
+    private String mobile;
     private int account_status;
     private ArrayList<String> categories;
 
     public SupplierRequest() {
     }
 
-    public SupplierRequest(String first_name, String last_name, String address, String email, int mobile, int account_status, ArrayList<String> categories) {
+    public SupplierRequest(String first_name, String last_name, String address, String email, String mobile, int account_status, ArrayList<String> categories) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.address = address;
@@ -58,11 +58,11 @@ public class SupplierRequest {
         this.email = email;
     }
 
-    public int getMobile() {
+    public String getMobile() {
         return mobile;
     }
 
-    public void setMobile(int mobile) {
+    public void setMobile(String mobile) {
         this.mobile = mobile;
     }
 

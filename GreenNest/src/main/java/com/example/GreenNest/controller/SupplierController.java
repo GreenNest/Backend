@@ -47,25 +47,25 @@ public class SupplierController {
 
     //add supplier
     @PostMapping("/addSupplier")
-    public boolean addSupplier(@RequestBody SupplierRequest supplierRequest) {
+    public int addSupplier(@RequestBody SupplierRequest supplierRequest) {
         String supplierEmail = supplierRepository.getProfileEmail(supplierRequest.getEmail());
         System.out.println(supplierEmail);
 
         if(supplierEmail == null) {
             supplierService.addSupplier(supplierRequest);
-            return true;
+            return 1;
         }else {
-            return false;
+            return 0;
         }
     }
 
     //edit supplier
     @PutMapping("/editSupplier/{id}")
     public int editSupplier(@RequestBody SupplierRequest supplierRequest, @PathVariable int id){
-        int supplier_id = supplierRepository.getProfileId(supplierRequest.getEmail());
-        System.out.println(supplier_id);
+        String supplier_id = supplierRepository.getProfileId(supplierRequest.getEmail());
+        String s_id = Integer.toString(id);
 
-        if(supplier_id == 0 || supplier_id == id) {
+        if(supplier_id.equals(s_id) || supplier_id == null) {
             SupplierDetails supplierDetails = supplierRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Supplier not exist"));
 //          System.out.println(supplierRequest.getCategories());
