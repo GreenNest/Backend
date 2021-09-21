@@ -48,8 +48,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -350,7 +352,7 @@ public class HomeController {
 
             }
 
-            return ResponseHandle.response("", HttpStatus.MULTI_STATUS, orderResponses);
+            return ResponseHandle.response("", HttpStatus.OK, orderResponses);
 
         }catch (Exception e){
             return ResponseHandle.response("Empty order items.", HttpStatus.MULTI_STATUS, null);
@@ -611,168 +613,253 @@ public class HomeController {
     //get order count of every month
     @GetMapping(value = "/order/getCount")
     public ResponseEntity<Object> getOrderCountOfMoth(){
+       try{
+           List<OrderDetails> orderDetailsList = orderDetailsRepository.findAll();
+           int count1 = 0;
+           int count2 = 0;
+           int count3 = 0;
+           int count4 = 0;
+           int count5 = 0;
+           int count6 = 0;
+           int count7 = 0;
+           int count8 = 0;
+           int count9 = 0;
+           int count10 = 0;
+           int count11 = 0;
+           int count12 = 0;
+           for(OrderDetails o : orderDetailsList){
+               //System.out.println(o.getDate());
+               if(o.getDate().toString().contains("-01-")){
+                   count1++;
+               }
+               if(o.getDate().toString().contains("-02-")){
+                   count2++;
+               }
+               if(o.getDate().toString().contains("-03-")){
+                   count3++;
+               }
+               if(o.getDate().toString().contains("-04-")){
+                   count4++;
+               }
+               if(o.getDate().toString().contains("-05-")){
+                   count5++;
+               }
+               if(o.getDate().toString().contains("-06-")){
+                   count6++;
+               }
+               if(o.getDate().toString().contains("-07-")){
+                   count7++;
+               }
+               if(o.getDate().toString().contains("-08-")){
+                   count8++;
+               }
+               if(o.getDate().toString().contains("-09-")){
+                   count9++;
+               }
+               if(o.getDate().toString().contains("-10-")){
+                   count10++;
+               }
+               if(o.getDate().toString().contains("-11-")){
+                   count11++;
+               }
+               if(o.getDate().toString().contains("-12-")){
+                   count12++;
+               }
 
-        List<OrderDetails> orderDetailsList = orderDetailsRepository.findAll();
-        int count1 = 0;
-        int count2 = 0;
-        int count3 = 0;
-        int count4 = 0;
-        int count5 = 0;
-        int count6 = 0;
-        int count7 = 0;
-        int count8 = 0;
-        int count9 = 0;
-        int count10 = 0;
-        int count11 = 0;
-        int count12 = 0;
-        for(OrderDetails o : orderDetailsList){
-            //System.out.println(o.getDate());
-            if(o.getDate().toString().contains("-01-")){
-                count1++;
-            }
-            if(o.getDate().toString().contains("-02-")){
-                count2++;
-            }
-            if(o.getDate().toString().contains("-03-")){
-                count3++;
-            }
-            if(o.getDate().toString().contains("-04-")){
-                count4++;
-            }
-            if(o.getDate().toString().contains("-05-")){
-                count5++;
-            }
-            if(o.getDate().toString().contains("-06-")){
-                count6++;
-            }
-            if(o.getDate().toString().contains("-07-")){
-                count7++;
-            }
-            if(o.getDate().toString().contains("-08-")){
-                count8++;
-            }
-            if(o.getDate().toString().contains("-09-")){
-                count9++;
-            }
-            if(o.getDate().toString().contains("-10-")){
-                count10++;
-            }
-            if(o.getDate().toString().contains("-11-")){
-                count11++;
-            }
-            if(o.getDate().toString().contains("-12-")){
-                count12++;
-            }
+           }
+           List<Integer> data = new ArrayList<Integer>();
+           data.add(count1);
+           data.add(count2);
+           data.add(count3);
+           data.add(count4);
+           data.add(count5);
+           data.add(count6);
+           data.add(count7);
+           data.add(count8);
+           data.add(count9);
+           data.add(count10);
+           data.add(count11);
+           data.add(count12);
 
-        }
-        List<Integer> data = new ArrayList<Integer>();
-        data.add(count1);
-        data.add(count2);
-        data.add(count3);
-        data.add(count4);
-        data.add(count5);
-        data.add(count6);
-        data.add(count7);
-        data.add(count8);
-        data.add(count9);
-        data.add(count10);
-        data.add(count11);
-        data.add(count12);
-
-        return ResponseHandle.response("Get the order count", HttpStatus.OK, data);
+           return ResponseHandle.response("Get the order count", HttpStatus.OK, data);
+       }catch (Exception e){
+           return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+       }
     }
 
     //get leave statistics
     @GetMapping(value = "/leave/count/{nic}")
     public ResponseEntity<Object> getTheLeaveCount(@PathVariable("nic") String nic){
-        Optional<Employee> employee = employeeRepository.findById(nic);
-        List<LeaveRequest> leaveRequestList = leaveRequestRepository.findByEmployee(employee.get());
-        int count1 = 0;
-        int count2 = 0;
-        int count3 = 0;
-        int count4 = 0;
-        int count5 = 0;
-        int count6 = 0;
-        int count7 = 0;
-        int count8 = 0;
-        int count9 = 0;
-        int count10 = 0;
-        int count11 = 0;
-        int count12 = 0;
-        for(LeaveRequest o : leaveRequestList){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        try{
+            Optional<Employee> employee = employeeRepository.findById(nic);
+            List<LeaveRequest> leaveRequestList = leaveRequestRepository.findByEmployee(employee.get());
+            int count1 = 0;
+            int count2 = 0;
+            int count3 = 0;
+            int count4 = 0;
+            int count5 = 0;
+            int count6 = 0;
+            int count7 = 0;
+            int count8 = 0;
+            int count9 = 0;
+            int count10 = 0;
+            int count11 = 0;
+            int count12 = 0;
+            for(LeaveRequest o : leaveRequestList){
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-            //set data into variable
-            final String date1 = o.getFromDate();
-            final String date2 = o.getToDate();
+                //set data into variable
+                final String date1 = o.getFromDate();
+                final String date2 = o.getToDate();
 
-            //convert into date fromat
-            final LocalDate date3 = LocalDate.parse(date1 , formatter);
-            final LocalDate date4 = LocalDate.parse(date2, formatter);
+                //convert into date fromat
+                final LocalDate date3 = LocalDate.parse(date1 , formatter);
+                final LocalDate date4 = LocalDate.parse(date2, formatter);
 
-            //get the leave days
-            final long  days = ChronoUnit.DAYS.between(date3, date4);
-            //System.out.println(o.getDate());
-            if(date3.toString().contains("-01-")){
-                count1++;
-            }
-            if(date3.toString().contains("-02-")){
-                count2++;
-            }
-            if(date3.toString().contains("-03-")){
-                count3++;
-            }
-            if(date3.toString().contains("-04-")){
-                count4++;
-            }
-            if(date3.toString().contains("-05-")){
-                count5++;
-            }
-            if(date3.toString().contains("-06-")){
-                count6++;
-            }
-            if(date3.toString().contains("-07-")){
-                count7++;
-            }
-            if(date3.toString().contains("-08-")){
-                count8++;
-            }
-            if(date3.toString().contains("-09-")){
-                count9++;
-            }
-            if(date3.toString().contains("-10-")){
-                count10++;
-            }
-            if(date3.toString().contains("-11-")){
-                count11++;
-            }
-            if(date3.toString().contains("-12-")){
-                count12++;
-            }
+                //get the leave days
+                final long  days = ChronoUnit.DAYS.between(date3, date4);
+                //System.out.println(o.getDate());
+                if(date3.toString().contains("-01-")){
+                    count1++;
+                }
+                if(date3.toString().contains("-02-")){
+                    count2++;
+                }
+                if(date3.toString().contains("-03-")){
+                    count3++;
+                }
+                if(date3.toString().contains("-04-")){
+                    count4++;
+                }
+                if(date3.toString().contains("-05-")){
+                    count5++;
+                }
+                if(date3.toString().contains("-06-")){
+                    count6++;
+                }
+                if(date3.toString().contains("-07-")){
+                    count7++;
+                }
+                if(date3.toString().contains("-08-")){
+                    count8++;
+                }
+                if(date3.toString().contains("-09-")){
+                    count9++;
+                }
+                if(date3.toString().contains("-10-")){
+                    count10++;
+                }
+                if(date3.toString().contains("-11-")){
+                    count11++;
+                }
+                if(date3.toString().contains("-12-")){
+                    count12++;
+                }
 
+            }
+            List<Integer> data = new ArrayList<Integer>();
+            data.add(count1);
+            data.add(count2);
+            data.add(count3);
+            data.add(count4);
+            data.add(count5);
+            data.add(count6);
+            data.add(count7);
+            data.add(count8);
+            data.add(count9);
+            data.add(count10);
+            data.add(count11);
+            data.add(count12);
+            return ResponseHandle.response("Get the order count", HttpStatus.OK, data);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
-        List<Integer> data = new ArrayList<Integer>();
-        data.add(count1);
-        data.add(count2);
-        data.add(count3);
-        data.add(count4);
-        data.add(count5);
-        data.add(count6);
-        data.add(count7);
-        data.add(count8);
-        data.add(count9);
-        data.add(count10);
-        data.add(count11);
-        data.add(count12);
-        return ResponseHandle.response("Get the order count", HttpStatus.OK, data);
     }
 
-    @GetMapping(value = "customer/orderRequest/{id}")
+    @GetMapping(value = "/customer/orderRequest/{id}")
     public ResponseEntity<Object> getCustomerOrderRequest(@PathVariable("id") int id){
-        Optional<Customer> customer = customerRepository.findById(id);
-        List<OrderRequest> orderRequestList = orderRequestRepository.findByCustomer(customer.get());
-        return ResponseHandle.response("Get the all requests", HttpStatus.OK, orderRequestList);
+        try{
+            Optional<Customer> customer = customerRepository.findById(id);
+            List<OrderRequest> orderRequestList = orderRequestRepository.findByCustomer(customer.get());
+
+            List<OrderRequest> orderRequests = new ArrayList<OrderRequest>();
+            for(OrderRequest o : orderRequestList){
+                if(o.getCustomerDelete() == 0){
+                    orderRequests.add(o);
+                }
+            }
+            return ResponseHandle.response("Get the all requests", HttpStatus.OK, orderRequests);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
 
     }
+
+    @PutMapping(value = "/customer/orderRequest/delete/{id}")
+    public ResponseEntity<Object> deleteOrderRequestCustomer(@PathVariable long id){
+        //Optional<Customer> customer = customerRepository.findById(id);
+        try{
+            Optional<OrderRequest> orderRequest = orderRequestRepository.findById(id);
+            orderRequest.get().setCustomerDelete(1);
+            orderRequest.get().setModeratorDelete(1);
+            orderRequestRepository.save(orderRequest.get());
+            return ResponseHandle.response("Delete the request", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @PostMapping(value = "/customer/acceptRequest/{id}")
+    public ResponseEntity<Object> acceptTheOrderRequest(@PathVariable long id){
+        try{
+            Optional<OrderRequest> orderRequest =  orderRequestRepository.findById(id);
+            orderRequest.get().setCustomerAccept(1);
+            orderRequest.get().setCustomerDelete(1);
+            orderRequestRepository.save(orderRequest.get());
+
+            Optional<Customer> customer = customerRepository.findById(orderRequest.get().getCustomer().getCustomer_id());
+            long pid = productRepository.requestProduct(orderRequest.get().getProductName());
+            System.out.println(pid);
+            Optional<Product> product = productRepository.findById(pid);
+
+            Cart cart = new Cart();
+            cart.setQuantity(orderRequest.get().getQuantity());
+            cart.setCustomer(customer.get());
+            cart.setTotalPrice(orderRequest.get().getQuantity() * product.get().getPrice());
+            cart.setProduct(product.get());
+            cartRepository.save(cart);
+
+            return ResponseHandle.response("Add to the cart", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+
+
+    }
+
+    @GetMapping(value = "/orderType/count")
+    public ResponseEntity<Object> getTheOrderTypeCount(){
+        try{
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAll();
+            ArrayList<Integer> data = new ArrayList<Integer>();
+            int count1 =0;
+            int count2 = 0;
+            for(OrderDetails o: orderDetailsList){
+                if(o.getOrder_type().contains("cash on delivery")){
+                    count1++;
+                }else{
+                    count2++;
+                }
+            }
+            data.add(count1);
+            data.add(count2);
+            return ResponseHandle.response("get the data", HttpStatus.MULTI_STATUS, data);
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+
 
 }

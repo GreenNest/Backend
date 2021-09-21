@@ -44,7 +44,7 @@ public class OrderRequestController {
         List<OrderRequest> orderRequests = orderRequestRepository.findAll();
         List<OrderRequest> filterOrderRequest = new ArrayList<OrderRequest>();
         for(OrderRequest o: orderRequests) {
-            if(o.getDeleteStatus() == 0){
+            if(o.getModeratorDelete() == 0){
                 filterOrderRequest.add(o);
             }
         }
@@ -65,12 +65,23 @@ public class OrderRequestController {
         }
     }
 
-    //checked request
+    //Accept request by moderator
     @PutMapping("/checkedRequest/{request_id}")
     public int checkedRequest(@PathVariable long request_id){
         OrderRequest orderRequest = orderRequestRepository.findById(request_id)
                 .orElseThrow(() -> new ResourceNotFoundException("Request not exist"));
-        orderRequest.setCheckStatus(1);
+        orderRequest.setModeratorAccept(1);
+        orderRequestRepository.save(orderRequest);
+
+        return 1;
+    }
+
+    //Decline request by moderator
+    @GetMapping("/declineRequest/{request_id}")
+    public int declineRequest(@PathVariable long request_id){
+        OrderRequest orderRequest = orderRequestRepository.findById(request_id)
+                .orElseThrow(() -> new ResourceNotFoundException("Request not exist"));
+        orderRequest.setModeratorDelete(1);
         orderRequestRepository.save(orderRequest);
 
         return 1;

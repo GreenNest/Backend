@@ -60,7 +60,7 @@ public class ProductController {
 
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
         }catch (Exception e){
-            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+            return ResponseHandle.response(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
