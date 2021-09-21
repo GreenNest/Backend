@@ -2,24 +2,17 @@ package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
 import com.example.GreenNest.model.*;
+import com.example.GreenNest.model.OrderDetails;
 import com.example.GreenNest.repository.*;
-import com.example.GreenNest.request.AuthenticationRequest;
-import com.example.GreenNest.request.LoginResponse;
-import com.example.GreenNest.request.OrderPlaceRequest;
-import com.example.GreenNest.request.ProductDetails;
+import com.example.GreenNest.request.*;
 import com.example.GreenNest.response.OrderPlaceResponse;
 import com.example.GreenNest.response.ProductResponse;
 import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
-import com.example.GreenNest.service.CategoryService;
-import com.example.GreenNest.service.MyUserDetailsService;
-import com.example.GreenNest.service.OrderPlaceService;
+import com.example.GreenNest.service.*;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
-import com.example.GreenNest.service.COService;
 import com.example.GreenNest.service.CategoryService;
-import com.example.GreenNest.service.ProductService;
-import com.example.GreenNest.service.Utility;
 import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -130,6 +123,9 @@ public class HomeController {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private OrderService orderService;
+
 
 
     @GetMapping("/user")
@@ -171,6 +167,7 @@ public class HomeController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserProfile userProfile = (UserProfile)authentication.getPrincipal();
         String jwtToken = jwtTokenHelper.generateToken(userProfile.getUsername());
+        System.out.println(authenticationRequest.getUserName());
 
         int x = userProfile.getUser_id();
         List<String> roles = userProfile.getAuthorities().stream()
@@ -377,15 +374,6 @@ public class HomeController {
         }
     }
 
-    //placeOrder
-
-    @Autowired
-    private OrderPlaceService service;
-
-    @PostMapping("/placeOrder")
-    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
-        return service.placeOrder(request);
-    }
 
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -560,8 +548,7 @@ public class HomeController {
         InvoiceData invoiceData = new InvoiceData();
         invoiceData.setCustomer_name(orderDetails.get().getCustomer().getFirst_name());
         invoiceData.setDate(orderDetails.get().getDate());
-        invoiceData.setAddress1(orderDetails.get().getAddress_line1());
-        invoiceData.setAddress2(orderDetails.get().getGetAddress_line2());
+        invoiceData.setAddress1(orderDetails.get().getAddress());
         invoiceData.setTown(orderDetails.get().getCity());
 
         List<OrderItems> orderItemsList = orderItemRepository.findByOrderDetails(orderDetails.get());
@@ -585,10 +572,10 @@ public class HomeController {
     public ResponseEntity<Object> sendInvoice( @RequestParam("invoice") MultipartFile multipartFile, @RequestParam("id") long id) throws MessagingException, UnsupportedEncodingException {
         Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(id);
         System.out.println(id);
-        System.out.println(orderDetails.get().getCustomer().getProfile().getEmail());
+        System.out.println(orderDetails.get().getCustomer().getFirst_name());
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom("greennest06@gmail.com", "Order Invoice");
+        helper.setFrom("greennest06@gmail.com", "Green Nest");
         helper.setTo(orderDetails.get().getCustomer().getProfile().getEmail());
         String subject = "Your Order Invoice";
         String content = "<p>Hi "+ orderDetails.get().getCustomer().getFirst_name() + "</p> " +
@@ -605,7 +592,7 @@ public class HomeController {
             };
             helper.addAttachment(fileName, source );
             //helper.addInline("image001", new File(fileName));
-            //mailSender.send(message);
+            mailSender.send(message);
         }
         return ResponseHandle.response("Send the invoice to the customer", HttpStatus.OK, null);
     }
@@ -853,7 +840,45 @@ public class HomeController {
             }
             data.add(count1);
             data.add(count2);
-            return ResponseHandle.response("get the data", HttpStatus.MULTI_STATUS, data);
+            return ResponseHandle.response("get the data", HttpStatus.OK, data);
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    @PostMapping(value = "/order/add")
+    public ResponseEntity<Object> saveTheOrderDetails(@RequestBody OrderDetails orderDetails){
+        try{
+            OrderDetails orderDetails1 = orderService.addOrder(orderDetails);
+            //OrderDetails orderDetails1 = orderDetailsRepository.findById()
+            return ResponseHandle.response("Confirm the order", HttpStatus.OK, orderDetails1.getOrder_id());
+
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+
+    }
+
+    @PostMapping(value = "/orderItems/add/{oid}")
+    public ResponseEntity<Object> addTheOrderItems(@RequestBody List<Long> id, @PathVariable long oid){
+        try{
+
+            for(int i=0 ; i<id.size(); i++){
+                OrderItems orderItems = new OrderItems();
+                Optional<Cart> cart = cartRepository.findById(id.get(i));
+                //System.out.println(cart.get().getCartId());
+                Optional<Product> product = productRepository.findById(cart.get().getProduct().getProduct_id());
+                //System.out.println(product.get().getProduct_name());
+                Optional<OrderDetails> orderDetails = orderDetailsRepository.findById(oid);
+                orderItems.setQuantity(cart.get().getQuantity());
+                orderItems.setProduct(product.get());
+                orderItems.setOrderDetails(orderDetails.get());
+                orderItemRepository.save(orderItems);
+                cartRepository.deleteById(cart.get().getCartId());
+            }
+
+            return ResponseHandle.response("save the items", HttpStatus.OK, null);
 
         }catch (Exception e){
             return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);

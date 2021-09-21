@@ -7,15 +7,13 @@ import java.util.List;
 public class InvoiceData{
     private Date date;
     private String address1;
-    private String address2;
     private String town;
     private String customer_name;
     private List<OrderResponse> orderResponses = new ArrayList<OrderResponse>();
 
-    public InvoiceData(Date date, String address1, String address2, String town, String customer_name, List<OrderResponse> orderResponses) {
+    public InvoiceData(Date date, String address1, String town, String customer_name, List<OrderResponse> orderResponses) {
         this.date = date;
         this.address1 = address1;
-        this.address2 = address2;
         this.town = town;
         this.customer_name = customer_name;
         this.orderResponses = orderResponses;
@@ -38,14 +36,6 @@ public class InvoiceData{
 
     public void setAddress1(String address1) {
         this.address1 = address1;
-    }
-
-    public String getAddress2() {
-        return address2;
-    }
-
-    public void setAddress2(String address2) {
-        this.address2 = address2;
     }
 
     public String getTown() {
