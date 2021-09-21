@@ -135,4 +135,20 @@ public class ProductController {
         return reorderLevelResponses;
     }
 
+    //get all products
+    @GetMapping("/get/products")
+    public List<ProductIdNameResponse> getAllProducts(){
+        List<Product> products = productRepository.findAll();
+        List<ProductIdNameResponse> productIdNameResponses = new ArrayList<ProductIdNameResponse>();
+        for(int i=0; i<products.size(); i++){
+            ProductIdNameResponse productIdNameResponse = new ProductIdNameResponse();
+
+            productIdNameResponse.setId(products.get(i).getProduct_id());
+            productIdNameResponse.setName(products.get(i).getProduct_name());
+
+            productIdNameResponses.add(productIdNameResponse);
+        }
+        return productIdNameResponses;
+    }
+
 }
