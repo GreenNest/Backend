@@ -1,79 +1,33 @@
-package com.example.GreenNest.model;
+package com.example.GreenNest.request;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import com.example.GreenNest.model.Customer;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
 
-@Entity
-@Table(name = "order_details")
 public class OrderDetails {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private long order_id;
-
-    @Column(name = "first_name")
     private String first_name;
-
-    @Column(name = "last_name")
     private String last_name;
-
-    @Column(name = "email")
     private String email;
-
-    @Column(name = "order_type")
     private String order_type;
-
-    @Column(name = "total_price")
     private double total_price;
-
-    @Column(name = "date", columnDefinition = "DATE")
     private Date date;
-
-    @Column(name = "address")
     private String address;
-
-    @Column(name = "state")
     private String state;
-
-    @Column(name = "city")
     private String city;
-
-    @Column(name = "postal_code")
     private int postal_code;
-
-    @Column(name = "mobile")
     private int mobile;
-
-    @Column(name = "order_status", columnDefinition = "varchar(255) default 'Pending'")
     private String order_status;
-
-    @Column(name = "delete_status", columnDefinition = "integer default 0")
     private int delete_status;
-
-    @Column(name = "employee_id")
     private String employee_id;
-
-    @Column(name = "delivery_id")
     private String delivery_id;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "post_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
-
-//    @OneToMany( mappedBy = "order_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    private Set<OrderItems> orderItems;
 
     public OrderDetails() {
     }
 
-    public OrderDetails(long order_id, String first_name, String last_name, String email, String order_type, double total_price, Date date, String address, String state, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
-        this.order_id = order_id;
+    public OrderDetails(String first_name, String last_name, String email, String order_type, double total_price, Date date, String address, String state, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
@@ -92,13 +46,6 @@ public class OrderDetails {
         this.customer = customer;
     }
 
-    public long getOrder_id() {
-        return order_id;
-    }
-
-    public void setOrder_id(long order_id) {
-        this.order_id = order_id;
-    }
 
     public String getFirst_name() {
         return first_name;
@@ -227,5 +174,4 @@ public class OrderDetails {
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
-
 }
