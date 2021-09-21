@@ -6,15 +6,17 @@ public class OrderItemResponse {
     private long product_id;
     private String Product_name;
     private long order_id;
+    private double item_price;
 
     public OrderItemResponse() {
     }
 
-    public OrderItemResponse(int quantity, long product_id, String product_name, long order_id) {
+    public OrderItemResponse(int quantity, long product_id, String product_name, long order_id, double item_price) {
         this.quantity = quantity;
         this.product_id = product_id;
         Product_name = product_name;
         this.order_id = order_id;
+        this.item_price = item_price;
     }
 
     public long getItem_id() {
@@ -55,5 +57,13 @@ public class OrderItemResponse {
 
     public void setOrder_id(long order_id) {
         this.order_id = order_id;
+    }
+
+    public double getItem_price() {
+        return item_price;
+    }
+
+    public void setItem_price(double item_price) {
+        this.item_price = item_price;
     }
 }
