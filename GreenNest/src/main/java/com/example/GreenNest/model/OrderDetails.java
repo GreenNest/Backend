@@ -16,6 +16,15 @@ public class OrderDetails {
     @Column(name = "order_id")
     private long order_id;
 
+    @Column(name = "first_name")
+    private String first_name;
+
+    @Column(name = "last_name")
+    private String last_name;
+
+    @Column(name = "email")
+    private String email;
+
     @Column(name = "order_type")
     private String order_type;
 
@@ -63,8 +72,11 @@ public class OrderDetails {
     public OrderDetails() {
     }
 
-    public OrderDetails(long order_id, String order_type, double total_price, Date date, String address, String state, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
+    public OrderDetails(long order_id, String first_name, String last_name, String email, String order_type, double total_price, Date date, String address, String state, String city, int postal_code, int mobile, String order_status, int delete_status, String employee_id, String delivery_id, Customer customer) {
         this.order_id = order_id;
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.email = email;
         this.order_type = order_type;
         this.total_price = total_price;
         this.date = date;
@@ -86,6 +98,30 @@ public class OrderDetails {
 
     public void setOrder_id(long order_id) {
         this.order_id = order_id;
+    }
+
+    public String getFirst_name() {
+        return first_name;
+    }
+
+    public void setFirst_name(String first_name) {
+        this.first_name = first_name;
+    }
+
+    public String getLast_name() {
+        return last_name;
+    }
+
+    public void setLast_name(String last_name) {
+        this.last_name = last_name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getOrder_type() {
