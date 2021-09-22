@@ -40,13 +40,14 @@ public class ProductService {
         for(int i=0;i<productDetails.getCategories().size();i++){
             System.out.println(productDetails.getCategories().get(i));
             Category category = categoryRepository.findByCategoryName(productDetails.getCategories().get(i));
+            product.getCategories().add(category);
             categories1.add(category);
         }
         for(Category c:categories1){
             System.out.println(c.getCategory_id());
         }
         //product.setCategories(categories1);
-        product.getCategories().addAll(categories1);
+        //product.getCategories().addAll(categories1);
 
 
         productRepository.save(product);
