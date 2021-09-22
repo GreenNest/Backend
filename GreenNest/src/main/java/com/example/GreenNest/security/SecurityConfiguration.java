@@ -85,11 +85,19 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                                 "/api/v1/getEmployee/{id}","/api/v1/editEmployee/{nic}", "/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/addCategory/{id}", "/api/v1/getOrderItems/{id}",
                                 "/api/v1/product/update/{id}/{amount}", "/api/v1/getSuppliers","/api/v1/order/get/{id}", "/api/v1/suppliersByCategory","/api/v1/supplierById/{id}","/api/v1/employees","/api/v1/viewEmployees/{id}","/api/v1/deleteEmployee/{id}","/api/v1/addSupplier","/api/v1/addCategory","/api/v1/getCategories","/api/v1/addCategory/{id}","/api/v1/product/{id}","/api/v1/deleteProduct/{id}",
                         "/api/v1/get/categories","/api/v1/product/{category}","/api/v1/request/add","/api/v1/reviews/add","/api/v1/reviews/get/{id}","/api/v1/cart/add","/api/v1/cart/get/{id}","/api/v1/cart/delete/{id}","/api/v1/getDeliveryPersons",
+<<<<<<< HEAD
+<<<<<<< HEAD
+                                "/api/v1/assignDPerson/{order_id}/{nic}/{eid}","/api/v1/getProcessingOrderDetails/{nic}","/api/v1/getDeliveredOrderDetails/{nic}","/api/v1/assignDelivered/{id}","/api/v1/getHandoverOrderDetails/{nic}","/api/v1/get/products",
+=======
+                                "/api/v1/assignDPerson/{order_id}/{nic}/{eid}","/api/v1/getProcessingOrderDetails/{nic}","/api/v1/get/products","/api/v1/assignDelivered/{id}","/api/v1/getReport/{product_name}/{from}/{to}", "/api/v1/findDPerson/{nic}","/api/v1/add/productExcel",
+>>>>>>> 7d91e06a1d18420fb7e496bd805e43f5f34ffc83
+=======
 
                                 "/api/v1/assignDPerson/{order_id}/{nic}/{eid}","/api/v1/getProcessingOrderDetails/{nic}","/api/v1/getDeliveredOrderDetails/{nic}","/api/v1/assignDelivered/{id}","/api/v1/getHandoverOrderDetails/{nic}","/api/v1/get/products",
 
                                 "/api/v1/assignDPerson/{order_id}/{nic}/{eid}","/api/v1/getProcessingOrderDetails/{nic}","/api/v1/get/products","/api/v1/assignDelivered/{id}","/api/v1/getReport/{product_name}/{from}/{to}", "/api/v1/findDPerson/{nic}","/api/v1/add/productExcel",
 
+>>>>>>> f3ac6da3dce23ee5471e222b298545e0c46b1269
                         "/api/v1/product/update/{id}/{amount}","/api/v1/order/get/{id}","/api/v1/orderItems/get/{id}","/api/v1/complain/add","/api/v1/customer/resetPassword","/api/v1/verificationCode/get/{email}","/api/v1/userPassword/get", "/api/v1/getSuppliers", "/api/v1/suppliersByCategory").permitAll()
                         .antMatchers("api/v1/leave/add").hasAuthority("accountant")
 

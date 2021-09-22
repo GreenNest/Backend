@@ -28,9 +28,9 @@ public class OrderService {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
 
-
     @Autowired
     private CustomerRepository customerRepository;
+
 
  public OrderDetails addOrder(OrderDetails orderDetails) {
     OrderDetails order = new OrderDetails();
