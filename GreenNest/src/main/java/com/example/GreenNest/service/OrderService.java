@@ -32,9 +32,6 @@ public class OrderService {
 //            (readOnly = false, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
 public void addOrder(OrderDetails orderDetails) throws IOException {
     OrderDetails order = new OrderDetails();
-    orderDetails.setFirst_name(orderDetails.getFirst_name());
-    orderDetails.setLast_name(orderDetails.getLast_name());
-    orderDetails.setEmail(orderDetails.getEmail());
     orderDetails.setOrder_type(orderDetails.getOrder_type());
     orderDetails.setTotal_price(orderDetails.getTotal_price());
     orderDetails.setDate(orderDetails.getDate());

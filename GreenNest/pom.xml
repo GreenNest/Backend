@@ -13,9 +13,14 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>GreenNest</name>
 	<description>Demo project for Spring Boot</description>
+
 	<properties>
 		<java.version>11</java.version>
+		<frontend-maven-plugin.version>1.6</frontend-maven-plugin.version>
+		<node.version>v14.17.4</node.version>
+		<npm.version>6.14.14</npm.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,5 +93,180 @@
 			</plugin>
 		</plugins>
 	</build>
+
+<!--	<profiles>-->
+<!--		<profile>-->
+<!--			<id>demo</id>-->
+<!--			<build>-->
+<!--				<plugins>-->
+<!--					<plugin>-->
+<!--						<groupId>com.github.eirslett</groupId>-->
+<!--						<artifactId>frontend-maven-plugin</artifactId>-->
+<!--						<version>${frontend-maven-plugin.version}</version>-->
+<!--						<configuration>-->
+<!--							<workingDirectory>src/js</workingDirectory>-->
+<!--						</configuration>-->
+<!--						<executions>-->
+<!--							<execution>-->
+<!--								<id>install node</id>-->
+<!--								<goals>-->
+<!--									<goal>install-node-and-npm</goal>-->
+<!--								</goals>-->
+<!--								<configuration>-->
+<!--									<nodeVersion>${node.version}</nodeVersion>-->
+<!--									<npm>${npm.version}</npm>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--							<execution>-->
+<!--								<id>npm install</id>-->
+<!--								<goals>-->
+<!--									<goal>npm</goal>-->
+<!--								</goals>-->
+<!--								<phase>generate-resources</phase>-->
+<!--							</execution>-->
+<!--							<execution>-->
+<!--								<id>npm test</id>-->
+<!--								<goals>-->
+<!--									<goal>npm</goal>-->
+<!--								</goals>-->
+<!--								<phase>test</phase>-->
+<!--								<configuration>-->
+<!--									<arguments>test</arguments>-->
+<!--									<environmentVariables>-->
+<!--										<CI>true</CI>-->
+<!--									</environmentVariables>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--							<execution>-->
+<!--								<id>npm build</id>-->
+<!--								<goals>-->
+<!--									<goal>npm</goal>-->
+<!--								</goals>-->
+<!--								<phase>compile</phase>-->
+<!--								<configuration>-->
+<!--									<arguments>build</arguments>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--						</executions>-->
+<!--					</plugin>-->
+<!--					<plugin>-->
+<!--						<artifactId>maven-resources-plugin</artifactId>-->
+<!--						<executions>-->
+<!--							<execution>-->
+<!--								<id>copy-resources</id>-->
+<!--								<phase>process-classes</phase>-->
+<!--								<goals>-->
+<!--									<goal>copy-resources</goal>-->
+<!--								</goals>-->
+<!--								<configuration>-->
+<!--									<outputDirectory>${basedir}/target/classes/static</outputDirectory>-->
+<!--									<resources>-->
+<!--										<resource>-->
+<!--											<directory>src/js/build</directory>-->
+<!--										</resource>-->
+<!--									</resources>-->
+<!--								</configuration>-->
+<!--							</execution>-->
+<!--						</executions>-->
+<!--					</plugin>-->
+<!--				</plugins>-->
+<!--			</build>-->
+<!--			<properties>-->
+<!--				<spring.profiles.active>-->
+<!--					demo-->
+<!--				</spring.profiles.active>-->
+<!--			</properties>-->
+<!--		</profile>-->
+<!--&lt;!&ndash;		<profile>&ndash;&gt;-->
+<!--&lt;!&ndash;			<id>demo-compile-to-java-8</id>&ndash;&gt;-->
+<!--&lt;!&ndash;			<build>&ndash;&gt;-->
+<!--&lt;!&ndash;				<plugins>&ndash;&gt;-->
+<!--&lt;!&ndash;					<plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;						<groupId>com.github.eirslett</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;						<artifactId>frontend-maven-plugin</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;						<version>${frontend-maven-plugin.version}</version>&ndash;&gt;-->
+<!--&lt;!&ndash;						<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							<workingDirectory>src/js</workingDirectory>&ndash;&gt;-->
+<!--&lt;!&ndash;						</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;						<executions>&ndash;&gt;-->
+<!--&lt;!&ndash;							<execution>&ndash;&gt;-->
+<!--&lt;!&ndash;								<id>install node</id>&ndash;&gt;-->
+<!--&lt;!&ndash;								<goals>&ndash;&gt;-->
+<!--&lt;!&ndash;									<goal>install-node-and-npm</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;								</goals>&ndash;&gt;-->
+<!--&lt;!&ndash;								<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;									<nodeVersion>${node.version}</nodeVersion>&ndash;&gt;-->
+<!--&lt;!&ndash;									<yarnVersion>${npm.version}</yarnVersion>&ndash;&gt;-->
+<!--&lt;!&ndash;								</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							</execution>&ndash;&gt;-->
+<!--&lt;!&ndash;							<execution>&ndash;&gt;-->
+<!--&lt;!&ndash;								<id>npm install</id>&ndash;&gt;-->
+<!--&lt;!&ndash;								<goals>&ndash;&gt;-->
+<!--&lt;!&ndash;									<goal>npm</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;								</goals>&ndash;&gt;-->
+<!--&lt;!&ndash;								<phase>generate-resources</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;							</execution>&ndash;&gt;-->
+<!--&lt;!&ndash;							<execution>&ndash;&gt;-->
+<!--&lt;!&ndash;								<id>npm test</id>&ndash;&gt;-->
+<!--&lt;!&ndash;								<goals>&ndash;&gt;-->
+<!--&lt;!&ndash;									<goal>npm</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;								</goals>&ndash;&gt;-->
+<!--&lt;!&ndash;								<phase>test</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;								<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;									<arguments>test</arguments>&ndash;&gt;-->
+<!--&lt;!&ndash;									<environmentVariables>&ndash;&gt;-->
+<!--&lt;!&ndash;										<CI>true</CI>&ndash;&gt;-->
+<!--&lt;!&ndash;									</environmentVariables>&ndash;&gt;-->
+<!--&lt;!&ndash;								</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							</execution>&ndash;&gt;-->
+<!--&lt;!&ndash;							<execution>&ndash;&gt;-->
+<!--&lt;!&ndash;								<id>npm build</id>&ndash;&gt;-->
+<!--&lt;!&ndash;								<goals>&ndash;&gt;-->
+<!--&lt;!&ndash;									<goal>npm</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;								</goals>&ndash;&gt;-->
+<!--&lt;!&ndash;								<phase>compile</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;								<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;									<arguments>build</arguments>&ndash;&gt;-->
+<!--&lt;!&ndash;								</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							</execution>&ndash;&gt;-->
+<!--&lt;!&ndash;						</executions>&ndash;&gt;-->
+<!--&lt;!&ndash;					</plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;					<plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;						<artifactId>maven-resources-plugin</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;						<executions>&ndash;&gt;-->
+<!--&lt;!&ndash;							<execution>&ndash;&gt;-->
+<!--&lt;!&ndash;								<id>copy-resources</id>&ndash;&gt;-->
+<!--&lt;!&ndash;								<phase>process-classes</phase>&ndash;&gt;-->
+<!--&lt;!&ndash;								<goals>&ndash;&gt;-->
+<!--&lt;!&ndash;									<goal>copy-resources</goal>&ndash;&gt;-->
+<!--&lt;!&ndash;								</goals>&ndash;&gt;-->
+<!--&lt;!&ndash;								<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;									<outputDirectory>${basedir}/target/classes/static</outputDirectory>&ndash;&gt;-->
+<!--&lt;!&ndash;									<resources>&ndash;&gt;-->
+<!--&lt;!&ndash;										<resource>&ndash;&gt;-->
+<!--&lt;!&ndash;											<directory>src/js/build</directory>&ndash;&gt;-->
+<!--&lt;!&ndash;										</resource>&ndash;&gt;-->
+<!--&lt;!&ndash;									</resources>&ndash;&gt;-->
+<!--&lt;!&ndash;								</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							</execution>&ndash;&gt;-->
+<!--&lt;!&ndash;						</executions>&ndash;&gt;-->
+<!--&lt;!&ndash;					</plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;					<plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;						<groupId>org.apache.maven.plugins</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;						<artifactId>maven-compiler-plugin</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;						<configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;							<source>1.8</source>&ndash;&gt;-->
+<!--&lt;!&ndash;							<target>1.8</target>&ndash;&gt;-->
+<!--&lt;!&ndash;						</configuration>&ndash;&gt;-->
+<!--&lt;!&ndash;					</plugin>&ndash;&gt;-->
+<!--&lt;!&ndash;				</plugins>&ndash;&gt;-->
+<!--&lt;!&ndash;			</build>&ndash;&gt;-->
+<!--&lt;!&ndash;			<properties>&ndash;&gt;-->
+<!--&lt;!&ndash;				<spring.profiles.active>&ndash;&gt;-->
+<!--&lt;!&ndash;					demo&ndash;&gt;-->
+<!--&lt;!&ndash;				</spring.profiles.active>&ndash;&gt;-->
+<!--&lt;!&ndash;			</properties>&ndash;&gt;-->
+<!--&lt;!&ndash;		</profile>&ndash;&gt;-->
+<!--	</profiles>-->
 
 </project>

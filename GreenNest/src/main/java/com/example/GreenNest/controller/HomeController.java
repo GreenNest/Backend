@@ -13,7 +13,7 @@ import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
-import com.example.GreenNest.service.OrderPlaceService;
+//import com.example.GreenNest.service.OrderPlaceService;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.COService;
@@ -368,13 +368,13 @@ public class HomeController {
 
     //placeOrder
 
-    @Autowired
-    private OrderPlaceService service;
-
-    @PostMapping("/placeOrder")
-    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
-        return service.placeOrder(request);
-    }
+//    @Autowired
+//    private OrderPlaceService service;
+//
+//    @PostMapping("/placeOrder")
+//    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
+//        return service.placeOrder(request);
+//    }
 
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

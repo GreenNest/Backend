@@ -94,14 +94,45 @@ public class OrderDetailsController {
     }
 
     //get order by delivery person
-    @GetMapping("/getOrderDetails/{nic}")
+    @GetMapping("/getProcessingOrderDetails/{nic}")
     public List<DPOrderResponse> getOrderDetails(@PathVariable String nic){
         List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
         List<DPOrderResponse> dpOrderResponses = new ArrayList<DPOrderResponse>();
 
         for(int i=0; i<orderDetails.size(); i++){
+            System.out.println(orderDetails.get(i).getDelivery_id());
+
+            if((orderDetails.get(i).getDelivery_id().contains(nic))
+                    && (orderDetails.get(i).getOrder_status().contains("Processing"))){
+
+                DPOrderResponse dpOrderResponse = new DPOrderResponse();
+                dpOrderResponse.setOrder_id(orderDetails.get(i).getOrder_id());
+                dpOrderResponse.setOrder_type(orderDetails.get(i).getOrder_type());
+                dpOrderResponse.setAddress(orderDetails.get(i).getAddress());
+                dpOrderResponse.setCity(orderDetails.get(i).getCity());
+                dpOrderResponse.setMobile(orderDetails.get(i).getMobile());
+                dpOrderResponse.setTotal_price(orderDetails.get(i).getTotal_price());
+
+                Customer customer = orderDetails.get(i).getCustomer();
+                dpOrderResponse.setFirst_name(customer.getFirst_name());
+                dpOrderResponse.setLast_name(customer.getLast_name());
+                System.out.println(orderDetails.get(i).getOrder_id());
+                dpOrderResponses.add(dpOrderResponse);
+            }
+        }
+
+        return dpOrderResponses;
+    }
+
+    //get Delivered order by delivery person
+    @GetMapping("/getDeliveredOrderDetails/{nic}")
+    public List<DPOrderResponse> getDeliveredOrderDetails(@PathVariable String nic){
+        List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
+        List<DPOrderResponse> dpOrderResponses = new ArrayList<DPOrderResponse>();
+
+        for(int i=0; i<orderDetails.size(); i++){
             if(orderDetails.get(i).getDelivery_id().equals(nic)
-                    && orderDetails.get(i).getOrder_status().equals("Processing")){
+                    && orderDetails.get(i).getOrder_status().equals("Delivered")){
                 DPOrderResponse dpOrderResponse = new DPOrderResponse();
                 dpOrderResponse.setOrder_id(orderDetails.get(i).getOrder_id());
                 dpOrderResponse.setOrder_type(orderDetails.get(i).getOrder_type());
@@ -120,4 +151,49 @@ public class OrderDetailsController {
 
         return dpOrderResponses;
     }
+
+    //get Handover order by delivery person
+    @GetMapping("/getHandoverOrderDetails/{nic}")
+    public List<DPOrderResponse> getHandoverOrderDetails(@PathVariable String nic){
+        List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
+        List<DPOrderResponse> dpOrderResponses = new ArrayList<DPOrderResponse>();
+
+        for(int i=0; i<orderDetails.size(); i++){
+            if(orderDetails.get(i).getDelivery_id().equals(nic)
+                    && orderDetails.get(i).getOrder_status().equals("Handover")){
+                DPOrderResponse dpOrderResponse = new DPOrderResponse();
+                dpOrderResponse.setOrder_id(orderDetails.get(i).getOrder_id());
+                dpOrderResponse.setOrder_type(orderDetails.get(i).getOrder_type());
+                dpOrderResponse.setAddress(orderDetails.get(i).getAddress());
+                dpOrderResponse.setCity(orderDetails.get(i).getCity());
+                dpOrderResponse.setMobile(orderDetails.get(i).getMobile());
+                dpOrderResponse.setTotal_price(orderDetails.get(i).getTotal_price());
+
+                Customer customer = orderDetails.get(i).getCustomer();
+                dpOrderResponse.setFirst_name(customer.getFirst_name());
+                dpOrderResponse.setLast_name(customer.getLast_name());
+
+                dpOrderResponses.add(dpOrderResponse);
+            }
+        }
+
+        return dpOrderResponses;
+    }
+
+    //assign delivered
+    @PutMapping("/assignDelivered/{id}")
+    public boolean assignDelivered(@PathVariable long id){
+        OrderDetails orderDetails = orderDetailsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not exist"));
+
+        if(orderDetails.getOrder_type().equals("online")){
+            orderDetails.setOrder_status("Delivered");
+        }else{
+            orderDetails.setOrder_status("Handover");
+        }
+
+        orderDetailsRepository.save(orderDetails);
+        return true;
+    }
+
 }
