@@ -7,6 +7,7 @@ import com.example.GreenNest.model.Product;
 import com.example.GreenNest.model.SupplierDetails;
 import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.ProductRepository;
+import com.example.GreenNest.request.Excel;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.service.CategoryService;
@@ -56,6 +57,19 @@ public class ProductController {
     public ResponseEntity<Object> addProduct(@ModelAttribute ProductDetails productDetails) throws IOException {
         try {
             productService.addProduct(productDetails);
+            //System.out.println(productDetails.getCategories());
+
+            return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
+        }catch (Exception e){
+            return ResponseHandle.response(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+        }
+    }
+
+    //add product excel
+    @PostMapping(value = "/add/productExcel")
+    public ResponseEntity<Object> addProduct(@RequestBody Excel excel) throws IOException {
+        try {
+            productService.addExel(excel);
             //System.out.println(productDetails.getCategories());
 
             return ResponseHandle.response("successfully added data", HttpStatus.OK, null);
