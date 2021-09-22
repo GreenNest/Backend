@@ -46,10 +46,10 @@ public class OrderDetails {
     @Column(name = "delete_status", columnDefinition = "integer default 0")
     private int delete_status;
 
-    @Column(name = "employee_id")
+    @Column(name = "employee_id", columnDefinition = "varchar(255) default '0'")
     private String employee_id;
 
-    @Column(name = "delivery_id")
+    @Column(name = "delivery_id", columnDefinition = "varchar(255) default '0'")
     private String delivery_id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
