@@ -182,8 +182,6 @@ public class OrderDetailsController {
         return dpOrderResponses;
     }
 
-
-    //get Delivered order by delivery person
     @GetMapping("/getDeliveredOrderDetails/{nic}")
     public List<DPOrderResponse> getDeliveredOrderDetails(@PathVariable String nic){
         List<OrderDetails> orderDetails = orderDetailsRepository.findAll();

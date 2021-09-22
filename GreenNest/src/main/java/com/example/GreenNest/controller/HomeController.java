@@ -11,7 +11,10 @@ import com.example.GreenNest.response.ResponseHandle;
 import com.example.GreenNest.security.JWTTokenHelper;
 import com.example.GreenNest.service.CategoryService;
 import com.example.GreenNest.service.MyUserDetailsService;
+<<<<<<< HEAD
 //import com.example.GreenNest.service.OrderPlaceService;
+=======
+>>>>>>> f3ac6da3dce23ee5471e222b298545e0c46b1269
 import com.example.GreenNest.service.*;
 import com.example.GreenNest.response.*;
 import com.example.GreenNest.security.JWTTokenHelper;
@@ -377,6 +380,7 @@ public class HomeController {
         }
     }
 
+<<<<<<< HEAD
     //placeOrder
 
 //    @Autowired
@@ -386,6 +390,8 @@ public class HomeController {
 //    public OrderPlaceResponse placeOrder(@RequestBody OrderPlaceRequest request){
 //        return service.placeOrder(request);
 //    }
+=======
+>>>>>>> f3ac6da3dce23ee5471e222b298545e0c46b1269
 
     //reset password
     @PostMapping(value = "/customer/resetPassword", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
