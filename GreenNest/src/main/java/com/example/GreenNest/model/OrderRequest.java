@@ -15,6 +15,11 @@ public class OrderRequest {
     @Column(name = "description", columnDefinition = "TEXT", nullable = false)
     private String description;
 
+
+//    @Column(name = "accept_description",  nullable = false, columnDefinition = "varchar(255) default 'We can supply your order'")
+//    private String accept_description;
+
+
     @Column(name = "quantity", nullable = false)
     private int quantity;
 

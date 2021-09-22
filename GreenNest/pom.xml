@@ -71,13 +71,17 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>5.3.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-<!--			<version>1.18.20</version>-->
 			<scope>provided</scope>
 		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>org.projectlombok</groupId>-->
+<!--			<artifactId>lombok</artifactId>-->
+<!--			<scope>provided</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -90,6 +94,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${parent.version}</version>
 			</plugin>
 		</plugins>
 	</build>

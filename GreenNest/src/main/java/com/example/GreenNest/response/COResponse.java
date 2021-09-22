@@ -7,15 +7,17 @@ public class COResponse {
     private int items;
     private Date date;
     private double cost;
+    private String status;
 
     public COResponse() {
     }
 
-    public COResponse(long id, int items, Date date, double cost) {
+    public COResponse(long id, int items, Date date, double cost, String status) {
         this.id = id;
         this.items = items;
         this.date = date;
         this.cost = cost;
+        this.status = status;
     }
 
     public long getId() {
@@ -48,5 +50,13 @@ public class COResponse {
 
     public void setCost(double cost) {
         this.cost = cost;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

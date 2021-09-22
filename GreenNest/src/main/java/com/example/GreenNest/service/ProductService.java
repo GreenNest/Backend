@@ -4,6 +4,7 @@ import com.example.GreenNest.model.Category;
 import com.example.GreenNest.model.Product;
 import com.example.GreenNest.repository.CategoryRepository;
 import com.example.GreenNest.repository.ProductRepository;
+import com.example.GreenNest.request.Excel;
 import com.example.GreenNest.request.ProductDetails;
 import com.example.GreenNest.response.ProductResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +41,35 @@ public class ProductService {
         for(int i=0;i<productDetails.getCategories().size();i++){
             System.out.println(productDetails.getCategories().get(i));
             Category category = categoryRepository.findByCategoryName(productDetails.getCategories().get(i));
+            product.getCategories().add(category);
             categories1.add(category);
         }
         for(Category c:categories1){
             System.out.println(c.getCategory_id());
         }
         //product.setCategories(categories1);
-        product.getCategories().addAll(categories1);
+        //product.getCategories().addAll(categories1);
 
+
+        productRepository.save(product);
+    }
+
+    public void addExel(Excel excel) throws IOException {
+        ArrayList<Category> categories = new ArrayList<Category>();
+        Product product = new Product();
+        product.setProduct_name(excel.getName());
+        product.setDescription(excel.getDetails());
+        product.setPrice(excel.getPrice());
+        product.setQuantity(excel.getAmount());
+        product.setFeatured(excel.isIsfeatured());
+        product.setReorder_level(excel.getReorderLevel());
+        productRepository.save(product);
+        List<Category> categories1= new ArrayList<Category>();
+
+        Category category = categoryRepository.findByCategoryName(excel.getCategory());
+        categories1.add(category);
+
+        product.getCategories().addAll(categories1);
 
         productRepository.save(product);
     }

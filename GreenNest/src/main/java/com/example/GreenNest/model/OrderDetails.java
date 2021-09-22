@@ -53,8 +53,8 @@ public class OrderDetails {
     private String delivery_id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "post_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "post_id")
+//    @OnDelete(action = OnDeleteAction.CASCADE)
     private Customer customer;
 
 //    @OneToMany( mappedBy = "order_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
