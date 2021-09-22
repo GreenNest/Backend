@@ -1,10 +1,8 @@
 package com.example.GreenNest.controller;
 
 import com.example.GreenNest.exception.ResourceNotFoundException;
-import com.example.GreenNest.model.Customer;
-import com.example.GreenNest.model.OrderDetails;
-import com.example.GreenNest.model.OrderItems;
-import com.example.GreenNest.model.Product;
+import com.example.GreenNest.model.*;
+import com.example.GreenNest.repository.EmployeeRepository;
 import com.example.GreenNest.repository.OrderDetailsRepository;
 import com.example.GreenNest.repository.OrderItemRepository;
 import com.example.GreenNest.response.DPOrderResponse;
@@ -26,6 +24,9 @@ public class OrderDetailsController {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     //get online payments
     @GetMapping("/getOnlinePayments")
@@ -93,8 +94,8 @@ public class OrderDetailsController {
         return 1;
     }
 
-    //get order by delivery person
-    @GetMapping("/getOrderDetails/{nic}")
+    //get processing order by delivery person
+    @GetMapping("/getProcessingOrderDetails/{nic}")
     public List<DPOrderResponse> getOrderDetails(@PathVariable String nic){
         List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
         List<DPOrderResponse> dpOrderResponses = new ArrayList<DPOrderResponse>();
@@ -119,5 +120,60 @@ public class OrderDetailsController {
         }
 
         return dpOrderResponses;
+    }
+
+    //get Delivered order by delivery person
+    @GetMapping("/getDeliveredOrderDetails/{nic}")
+    public List<DPOrderResponse> getDeliveredOrderDetails(@PathVariable String nic){
+        List<OrderDetails> orderDetails = orderDetailsRepository.findAll();
+        List<DPOrderResponse> dpOrderResponses = new ArrayList<DPOrderResponse>();
+
+        for(int i=0; i<orderDetails.size(); i++){
+            if(orderDetails.get(i).getDelivery_id().equals(nic)
+                    && orderDetails.get(i).getOrder_status().equals("Delivered")){
+                DPOrderResponse dpOrderResponse = new DPOrderResponse();
+                dpOrderResponse.setOrder_id(orderDetails.get(i).getOrder_id());
+                dpOrderResponse.setOrder_type(orderDetails.get(i).getOrder_type());
+                dpOrderResponse.setAddress(orderDetails.get(i).getAddress());
+                dpOrderResponse.setCity(orderDetails.get(i).getCity());
+                dpOrderResponse.setMobile(orderDetails.get(i).getMobile());
+                dpOrderResponse.setTotal_price(orderDetails.get(i).getTotal_price());
+
+                Customer customer = orderDetails.get(i).getCustomer();
+                dpOrderResponse.setFirst_name(customer.getFirst_name());
+                dpOrderResponse.setLast_name(customer.getLast_name());
+
+                dpOrderResponses.add(dpOrderResponse);
+            }
+        }
+
+        return dpOrderResponses;
+    }
+
+    //assign delivered
+    @PutMapping("/assignDelivered/{id}")
+    public boolean assignDelivered(@PathVariable long id){
+        OrderDetails orderDetails = orderDetailsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not exist"));
+
+        if(orderDetails.getOrder_type().equals("online")){
+            orderDetails.setOrder_status("Delivered");
+        }else{
+            orderDetails.setOrder_status("Handover");
+        }
+
+        orderDetailsRepository.save(orderDetails);
+        return true;
+    }
+
+    //delivery person
+    @GetMapping("/findDPerson/{nic}")
+    public String deliveryP(@PathVariable String nic){
+        Employee employee = employeeRepository.findById(nic)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not exist"));
+
+        String name = (employee.getFirst_name() + " " + employee.getLast_name());
+
+        return name;
     }
 }
