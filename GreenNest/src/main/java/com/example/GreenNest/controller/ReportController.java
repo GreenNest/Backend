@@ -22,31 +22,31 @@ public class ReportController {
     private OrderItemRepository orderItemRepository;
 
     //get report
-//    @GetMapping("/getReport/{product_name}/{from}/{to}")
-//    public List<ReportResponse> getReport(@PathVariable String product_name, @PathVariable Date from, @PathVariable Date to){
-//        List<ReportResponse> reportResponses = new ArrayList<ReportResponse>();
-//        List<OrderItems> orderItems = orderItemRepository.findAll();
-//        for(int i=0; i<orderItems.size(); i++){
-//            Product product = orderItems.get(i).getProduct();
-//            OrderDetails orderDetails = orderItems.get(i).getOrderDetails();
-//            System.out.println(orderDetails.getDate());
-//            if(product.getProduct_name().equals(product_name)
+    @GetMapping("/getReport/{product_name}")
+    public List<ReportResponse> getReport(@PathVariable String product_name, @PathVariable Date from, @PathVariable Date to){
+        List<ReportResponse> reportResponses = new ArrayList<ReportResponse>();
+        List<OrderItems> orderItems = orderItemRepository.findAll();
+        for(int i=0; i<orderItems.size(); i++){
+            Product product = orderItems.get(i).getProduct();
+            OrderDetails orderDetails = orderItems.get(i).getOrderDetails();
+            System.out.println(orderDetails.getDate());
+            if(product.getProduct_name().equals(product_name)
 //                    && orderDetails.getDate().before(to) && orderDetails.getDate().after(from)
-//            ){
-//                ReportResponse reportResponse = new ReportResponse();
-//                reportResponse.setQuantity(orderItems.get(i).getQuantity());
-//
-//                reportResponse.setAddress(orderDetails.getAddress());
-//                reportResponse.setCity(orderDetails.getCity());
-//                Customer customer = orderDetails.getCustomer();
-//
-//                reportResponse.setFirst_name(customer.getFirst_name());
-//                reportResponse.setLast_name(customer.getLast_name());
-//                reportResponse.setMobile(customer.getMobile());
-//
-//                reportResponses.add(reportResponse);
-//            }
-//        }
-//        return reportResponses;
-//    }
+            ){
+                ReportResponse reportResponse = new ReportResponse();
+                reportResponse.setQuantity(orderItems.get(i).getQuantity());
+
+                reportResponse.setAddress(orderDetails.getAddress());
+                reportResponse.setCity(orderDetails.getCity());
+                Customer customer = orderDetails.getCustomer();
+
+                reportResponse.setFirst_name(customer.getFirst_name());
+                reportResponse.setLast_name(customer.getLast_name());
+                reportResponse.setMobile(customer.getMobile());
+
+                reportResponses.add(reportResponse);
+            }
+        }
+        return reportResponses;
+    }
 }
