@@ -19,7 +19,7 @@ public class COService {
     public ArrayList<COResponse> createCOResponses (List<OrderDetails> orderDetails){
         ArrayList<COResponse> coResponses = new ArrayList<COResponse>();
         for(OrderDetails o : orderDetails){
-            if(o.getOrder_type().equals("cash on delivery")){
+            if(o.getOrder_type().equals("cash on delivery") && o.getOrder_status().equals("Handover")){
                 List<OrderItems> orderItems = orderItemRepository.findByOrderDetails(o);
                 if(o.getDelete_status() == 0){
                     COResponse coResponse = new COResponse();
